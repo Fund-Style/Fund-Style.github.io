@@ -262,18 +262,23 @@
         <!-- SECTION 4: 포트폴리오 -->
         <section id="sect-portfolio-holdings" class="tab-content hidden space-y-6">
             <!-- Summary Metric Cards -->
-            <div class="grid grid-cols-1 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
-                    <p class="text-xs font-medium text-gray-400">보유 종목 수</p>
+                    <p class="text-xs font-medium text-gray-400">Fund-Style 보유 종목 수</p>
                     <p class="text-3xl font-extrabold text-white mt-2" id="val-holdings-count">0개</p>
                     <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">2026.05.30 기준</p>
                 </div>
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">Free-Style 보유 종목 수</p>
+                    <p class="text-3xl font-extrabold text-white mt-2" id="val-freestyle-count">0개</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-freestyle-holdings-date">2026.05.30 기준</p>
+                </div>
             </div>
 
-            <!-- Holdings Current Layout (Single Card styled exactly like input_file_6.png) -->
+            <!-- Fund-Style Portfolio Block -->
             <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-white">현재 포트폴리오 구성</h2>
+                    <h2 class="text-xl font-bold text-white">Fund-Style Portfolio</h2>
                     <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">2026-05-30 기준</p>
                 </div>
                 <div class="overflow-x-auto">
@@ -286,6 +291,28 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="holdings-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Free-Style Portfolio Block -->
+            <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-white">Free-Style Portfolio</h2>
+                    <p class="text-xs text-gray-400 mt-1" id="lbl-freestyle-holdings-table-date">2026-05-30 기준</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
+                                <th class="py-3">종목</th>
+                                <th class="py-3 text-right">비중</th>
+                                <th class="py-3 text-right">전월 대비 비중 변화</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="freestyle-holdings-table-body">
                             <!-- Populated dynamically via JS -->
                         </tbody>
                     </table>
@@ -1010,7 +1037,7 @@
     }
 ];
 
-        // (D) 포트폴리오 비중 데이터 (비중 변화 정보를 관리합니다)
+        // (D) Fund-Style 포트폴리오 비중 데이터 (비중 변화 정보를 관리합니다)
         // 형식: { name: '종목명', weight: '비중(%)', change: '전월대비 변화(%)' }
         const holdingsData = [
             { "name": "Bloom Energy", "weight": "10.14%", "change": "+0.01%" },
@@ -1025,6 +1052,11 @@
             { "name": "ASE Tech", "weight": "6.98%", "change": "-0.25%" },
             { "name": "ARM", "weight": "5.28%", "change": "+5.28%" },
             { "name": "Intel", "weight": "2.66%", "change": "-3.32%" }
+        ];
+
+        // (E) Free-Style 포트폴리오 비중 데이터
+        const freestyleHoldingsData = [
+            { "name": "3SND", "weight": "100.00%", "change": "+100.00%" }
         ];
 
         // Format raw numbers to currency strings
@@ -1194,6 +1226,7 @@
 
             // 5) 포트폴리오 요약 메트릭 카드 업데이트
             document.getElementById('val-holdings-count').textContent = holdingsData.length + '개';
+            document.getElementById('val-freestyle-count').textContent = freestyleHoldingsData.length + '개';
 
             // 6) 월별 자산변화 리스트 데이터 테이블 채우기
             const tableBody = document.getElementById('monthly-table-body');
@@ -1213,7 +1246,7 @@
                 tableBody.appendChild(tr);
             });
 
-            // 7) 포트폴리오 비중 구성 데이터 테이블 채우기
+            // 7) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기
             const holdingsTableBody = document.getElementById('holdings-table-body');
             holdingsData.forEach(h => {
                 const tr = document.createElement('tr');
@@ -1227,6 +1260,22 @@
                     <td class="py-3.5 text-right ${changeClass} font-bold">${h.change}</td>
                 `;
                 holdingsTableBody.appendChild(tr);
+            });
+
+            // 8) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기
+            const freestyleHoldingsTableBody = document.getElementById('freestyle-holdings-table-body');
+            freestyleHoldingsData.forEach(h => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
+                const isPositive = h.change.startsWith('+');
+                const changeClass = isPositive ? "text-[#10b981]" : "text-[#ef4444]";
+                
+                tr.innerHTML = `
+                    <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
+                    <td class="py-3.5 text-right text-white font-bold">${h.weight}</td>
+                    <td class="py-3.5 text-right ${changeClass} font-bold">${h.change}</td>
+                `;
+                freestyleHoldingsTableBody.appendChild(tr);
             });
 
             // ==========================================
