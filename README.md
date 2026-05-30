@@ -1,1 +1,1627 @@
-# Fund-Style.github.io
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund-Style Portfolio Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js (Use stable UMD build from cdnjs for maximum reliability) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+        body {
+            font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+            background-color: #0b0c0e;
+            color: #e2e8f0;
+        }
+        .tab-btn.active {
+            background-color: #ffffff;
+            color: #0b0c0e;
+            font-weight: 600;
+        }
+        .tab-btn.inactive {
+            background-color: #1e2025;
+            color: #94a3b8;
+        }
+        .tab-btn.inactive:hover {
+            background-color: #272a31;
+            color: #ffffff;
+        }
+        /* Beautiful scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111216;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3139;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3f4552;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-12">
+    <!-- Main Container -->
+    <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex-grow">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <span>Fund-Style Portfolio</span>
+                    <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">Ver 3.0</span>
+                </h1>
+                <p class="text-sm text-gray-400 mt-1">Nasdaq-100 TR Active ETF Portfolio</p>
+                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.05.30</p>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <div class="flex flex-wrap gap-2">
+                <button onclick="switchTab('this-month')" id="tab-this-month" class="tab-btn active px-4 py-2 text-xs sm:text-sm rounded-lg transition-all duration-200">
+                    포트폴리오 성과(이번달)
+                </button>
+                <button onclick="switchTab('cumulative')" id="tab-cumulative" class="tab-btn inactive px-4 py-2 text-xs sm:text-sm rounded-lg transition-all duration-200">
+                    포트폴리오 성과(누적)
+                </button>
+                <button onclick="switchTab('monthly-change')" id="tab-monthly-change" class="tab-btn inactive px-4 py-2 text-xs sm:text-sm rounded-lg transition-all duration-200">
+                    월별 자산변화(전체 계좌)
+                </button>
+                <button onclick="switchTab('portfolio-holdings')" id="tab-portfolio-holdings" class="tab-btn inactive px-4 py-2 text-xs sm:text-sm rounded-lg transition-all duration-200">
+                    포트폴리오
+                </button>
+                <button onclick="switchTab('investment-rules')" id="tab-investment-rules" class="tab-btn inactive px-4 py-2 text-xs sm:text-sm rounded-lg transition-all duration-200">
+                    운용규칙
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Sections -->
+        
+        <!-- SECTION 1: 포트폴리오 성과(이번달) -->
+        <section id="sect-this-month" class="tab-content block space-y-6">
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">이번달 수익률</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-this-month-ret">+0.00%</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: 2026.04.30 ~ ...</p>
+                </div>
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-this-month-diff">+0.00%p</p>
+                    <p class="text-[10px] text-gray-500 mt-1">초과 성과</p>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">포트폴리오 성과 추이 (이번달)</h2>
+                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">2026.04.30을 0.00% 기준으로 한 상대 수익률 추이</p>
+                    </div>
+                    <!-- Custom HTML Legend styled exactly matching line colors -->
+                    <div class="flex flex-wrap gap-2 text-xs" id="legend-this-month">
+                        <button id="btn-this-month-0" onclick="toggleDataset('this-month', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
+                            <span>Portfolio</span>
+                        </button>
+                        <button id="btn-this-month-1" onclick="toggleDataset('this-month', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+                            <span>Nasdaq-100 TR</span>
+                        </button>
+                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
+                        <button id="btn-this-month-2" onclick="toggleDataset('this-month', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.6)]"></span>
+                            <span>S&P500 TR</span>
+                        </button>
+                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
+                        <button id="btn-this-month-3" onclick="toggleDataset('this-month', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.35)]"></span>
+                            <span>PHLX TR</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="h-[400px] w-full relative">
+                    <canvas id="chart-this-month"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 포트폴리오 성과(누적) -->
+        <section id="sect-cumulative" class="tab-content hidden space-y-6">
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">누적 수익률</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-ret">+0.00%</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-period">기간: 2026.01.28 ~ ...</p>
+                </div>
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-diff">+0.00%p</p>
+                    <p class="text-[10px] text-gray-500 mt-1">초과 성과</p>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">포트폴리오 성과 추이 (누적)</h2>
+                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-cum-chart-sub">2026.01.28을 0.00% 기준으로 한 누적 수익률 추이</p>
+                    </div>
+                    <!-- Custom HTML Legend styled exactly matching line colors -->
+                    <div class="flex flex-wrap gap-2 text-xs" id="legend-cumulative">
+                        <button id="btn-cumulative-0" onclick="toggleDataset('cumulative', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
+                            <span>Portfolio</span>
+                        </button>
+                        <button id="btn-cumulative-1" onclick="toggleDataset('cumulative', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+                            <span>Nasdaq-100 TR</span>
+                        </button>
+                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
+                        <button id="btn-cumulative-2" onclick="toggleDataset('cumulative', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.6)]"></span>
+                            <span>S&P500 TR</span>
+                        </button>
+                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
+                        <button id="btn-cumulative-3" onclick="toggleDataset('cumulative', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#20222a] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.35)]"></span>
+                            <span>PHLX TR</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="h-[400px] w-full relative">
+                    <canvas id="chart-cumulative"></canvas>
+                </div>
+            </div>
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">비교지수 상관계수</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2">0.743</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: 2026.01.28 ~ 2026.05.29</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: 월별 자산변화 -->
+        <section id="sect-monthly-change" class="tab-content hidden space-y-6">
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400" id="lbl-assets-final-month">총 자산 (5월말 기준)</p>
+                    <p class="text-3xl font-extrabold text-white mt-2" id="val-total-assets">0원</p>
+                    <p class="text-[10px] text-gray-500 mt-1">기말 최종 자산총액</p>
+                </div>
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">누적 투자 손익</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-pl">+0원</p>
+                    <p class="text-[10px] text-gray-500 mt-1">2026.01.01 ~ 현재</p>
+                </div>
+            </div>
+
+            <!-- Staked Layout for Premium Balance and Reading Room -->
+            <div class="flex flex-col gap-6">
+                <!-- 반응형 그리드: 모바일은 1열 세로, 데스크톱(lg 이상) 해상도에서는 3열(2:1 비율)로 가로 배치 -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- 1. Monthly Asset Growth Analysis Card (2열 가로 길이 차지) -->
+                    <div class="lg:col-span-2 bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-white">월별 자산 변동 분석</h2>
+                            <span class="text-[10px] text-gray-500">단위: 원</span>
+                        </div>
+                        <div class="h-[320px] w-full relative">
+                            <canvas id="chart-monthly"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 2. Doughnut Chart Card (전체 계좌 구성) (1열 가로 길이 차지) -->
+                    <div class="lg:col-span-1 bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-white">전체 계좌 구성</h2>
+                        </div>
+                        <!-- 가로 배치 시 막대그래프 카드와 일치하도록 높이를 h-[320px]로 통일 -->
+                        <div class="h-[320px] w-full relative flex items-center justify-center">
+                            <div class="w-full max-w-[320px] h-full">
+                                <canvas id="chart-composition"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Monthly Asset Change List Table Card (전체 가로폭 유지) -->
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md w-full flex flex-col">
+                    <h2 class="text-base font-bold text-white mb-3">월별 자산변화 내역</h2>
+                    <div class="overflow-x-auto flex-grow">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-[11px] font-semibold text-gray-400 tracking-wider">
+                                    <th class="pb-2">구분</th>
+                                    <th class="pb-2 text-right">기초 자산</th>
+                                    <th class="pb-2 text-right">순 입금액</th>
+                                    <th class="pb-2 text-right">투자 손익</th>
+                                    <th class="pb-2 text-right">기말 자산</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs divide-y divide-gray-800/40 text-gray-300" id="monthly-table-body">
+                                <!-- Appended dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: 포트폴리오 -->
+        <section id="sect-portfolio-holdings" class="tab-content hidden space-y-6">
+            <!-- Summary Metric Cards -->
+            <div class="grid grid-cols-1 gap-4">
+                <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
+                    <p class="text-xs font-medium text-gray-400">보유 종목 수</p>
+                    <p class="text-3xl font-extrabold text-white mt-2" id="val-holdings-count">0개</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">2026.05.30 기준</p>
+                </div>
+            </div>
+
+            <!-- Holdings Current Layout (Single Card styled exactly like input_file_6.png) -->
+            <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-white">현재 포트폴리오 구성</h2>
+                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">2026-05-30 기준</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
+                                <th class="py-3">종목</th>
+                                <th class="py-3 text-right">비중</th>
+                                <th class="py-3 text-right">전월 대비 비중 변화</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="holdings-table-body">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: 운용규칙 -->
+        <section id="sect-investment-rules" class="tab-content hidden space-y-6">
+            <!-- Rules Card -->
+            <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-white">펀드식 포트폴리오 운용규칙</h2>
+                    <p class="text-xs text-gray-400 mt-1">시행일자: 2026.05.26 ~ 현재</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Rule 1 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">1</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">미국 증권거래소에서 거래되는 주식과 ADR, 기초지수 추종 패시브 ETF를 편입 가능 자산으로 한다.</p>
+                    </div>
+                    <!-- Rule 2 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">2</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">편입 가능한 주식과 ADR은 시가총액 100억 달러 이상 기업으로 한정한다. </p>
+                    </div>
+                    <!-- Rule 3 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">3</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">불가피한 상황 을 제외하고 정규장 시간에만 자산을 거래한다. </p>
+                    </div>
+                    <!-- Rule 4 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">4</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">주식의 비중을 60% 이상으로 운용한다.
+</p>
+                    </div>
+                   <!-- Rule 5 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">5</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">포트폴리오 내 각 개별주식의 비중은 10% 이하로 운용해야하며 발행주체가 같은 종류주식의 경우 이를 합산하여 비중을 계산한다.</p>
+                    </div>
+                    <!-- Rule 6 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">6</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">가격변동과 같은 불가피한 사유로 10% 비중을 초과한 경우 3개월 까지는 운용규칙에 적합한 것으로 본다.</p>
+                    </div>
+                    <!-- Rule 7 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">7</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">비중초과 사유가 발생하였을 경우 적극적으로 이를 해소하려는 노력을 해야 한다.</p>
+                    </div>
+                    <!-- Rule 8 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">8</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">비교지수는 Nasdaq-100 TR 이다.</p>
+                    </div>
+                    <!-- Rule 9 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">9</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">운용자산으로부터 수취한 배당금은 전부 재투자한다. </p>
+                    </div>
+                    <!-- Rule 10 -->
+                    <div class="flex items-start gap-4 p-4 rounded-xl bg-[#1e2025]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
+                        <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">10</span>
+                        <p class="text-sm text-gray-300 leading-relaxed">최근 1년 순자산 가치의 일간 변동률과 비교지수의 일간변동률의 공분산을 두 값의 표준편차를 곱한 값으로 나누어 산출한 값(상관계수)이 0.7 이상이 되도록 운용한다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Embedded JSON Data and JS Core -->
+    <script>
+        // ==========================================
+        // [1] 수정 가능한 원본 데이터 세트
+        // 누적/이번달 수익률 등의 모든 계산은 자동으로 수행됩니다.
+        // ==========================================
+
+        // (A) 일간 지수 데이터 (새로운 날짜 데이터를 맨 아래에 행으로 쉽게 추가해 주세요)
+        // 형식: ['날짜 (YYYY-MM-DD)', Portfolio, Nasdaq-100 TR, S&P500 TR, PHLX Semiconductor TR]
+        const rawDailyPrices = [
+    [
+        "2026-01-28",
+        100.0,
+        100.0,
+        100.0,
+        100.0
+    ],
+    [
+        "2026-01-29",
+        100.22,
+        99.47,
+        99.87,
+        100.16
+    ],
+    [
+        "2026-01-30",
+        98.55,
+        98.2,
+        99.45,
+        96.32
+    ],
+    [
+        "2026-02-02",
+        100.78,
+        98.92,
+        99.99,
+        97.96
+    ],
+    [
+        "2026-02-03",
+        99.17,
+        97.38,
+        99.15,
+        95.93
+    ],
+    [
+        "2026-02-04",
+        95.97,
+        95.66,
+        98.65,
+        91.75
+    ],
+    [
+        "2026-02-05",
+        95.22,
+        94.35,
+        97.44,
+        91.7
+    ],
+    [
+        "2026-02-06",
+        99.85,
+        96.37,
+        99.36,
+        96.92
+    ],
+    [
+        "2026-02-09",
+        99.91,
+        97.12,
+        99.84,
+        98.29
+    ],
+    [
+        "2026-02-10",
+        96.83,
+        96.58,
+        99.51,
+        97.63
+    ],
+    [
+        "2026-02-11",
+        99.87,
+        96.87,
+        99.51,
+        99.86
+    ],
+    [
+        "2026-02-12",
+        100.14,
+        94.89,
+        97.96,
+        97.36
+    ],
+    [
+        "2026-02-13",
+        98.03,
+        95.08,
+        98.03,
+        98.0
+    ],
+    [
+        "2026-02-17",
+        96.28,
+        94.96,
+        98.14,
+        97.99
+    ],
+    [
+        "2026-02-18",
+        97.83,
+        95.72,
+        98.69,
+        98.93
+    ],
+    [
+        "2026-02-19",
+        96.73,
+        95.34,
+        98.42,
+        98.44
+    ],
+    [
+        "2026-02-20",
+        98.72,
+        96.17,
+        99.11,
+        99.49
+    ],
+    [
+        "2026-02-23",
+        97.84,
+        95.01,
+        98.08,
+        98.94
+    ],
+    [
+        "2026-02-24",
+        98.44,
+        96.04,
+        98.84,
+        100.38
+    ],
+    [
+        "2026-02-25",
+        99.8,
+        97.39,
+        99.65,
+        102.01
+    ],
+    [
+        "2026-02-26",
+        97.78,
+        96.26,
+        99.11,
+        98.75
+    ],
+    [
+        "2026-02-27",
+        97.19,
+        95.98,
+        98.69,
+        97.56
+    ],
+    [
+        "2026-03-02",
+        95.96,
+        96.11,
+        98.74,
+        98.03
+    ],
+    [
+        "2026-03-03",
+        92.38,
+        95.07,
+        97.81,
+        93.56
+    ],
+    [
+        "2026-03-04",
+        94.91,
+        96.51,
+        98.57,
+        95.37
+    ],
+    [
+        "2026-03-05",
+        93.61,
+        96.23,
+        98.02,
+        94.27
+    ],
+    [
+        "2026-03-06",
+        90.38,
+        94.79,
+        96.73,
+        90.57
+    ],
+    [
+        "2026-03-09",
+        94.44,
+        96.05,
+        97.54,
+        94.13
+    ],
+    [
+        "2026-03-10",
+        95.86,
+        96.0,
+        97.35,
+        94.79
+    ],
+    [
+        "2026-03-11",
+        97.43,
+        96.04,
+        97.27,
+        95.38
+    ],
+    [
+        "2026-03-12",
+        94.81,
+        94.38,
+        95.79,
+        92.11
+    ],
+    [
+        "2026-03-13",
+        96.51,
+        93.81,
+        95.22,
+        92.16
+    ],
+    [
+        "2026-03-16",
+        99.31,
+        94.86,
+        96.2,
+        93.96
+    ],
+    [
+        "2026-03-17",
+        102.65,
+        95.35,
+        96.44,
+        94.46
+    ],
+    [
+        "2026-03-18",
+        101.57,
+        93.98,
+        95.13,
+        93.96
+    ],
+    [
+        "2026-03-19",
+        102.07,
+        93.71,
+        94.87,
+        94.78
+    ],
+    [
+        "2026-03-20",
+        97.78,
+        91.96,
+        93.44,
+        92.46
+    ],
+    [
+        "2026-03-23",
+        98.24,
+        93.08,
+        94.52,
+        93.71
+    ],
+    [
+        "2026-03-24",
+        98.02,
+        92.36,
+        94.16,
+        94.91
+    ],
+    [
+        "2026-03-25",
+        97.37,
+        92.98,
+        94.68,
+        96.07
+    ],
+    [
+        "2026-03-26",
+        91.26,
+        90.77,
+        93.03,
+        91.47
+    ],
+    [
+        "2026-03-27",
+        90.77,
+        89.02,
+        91.48,
+        89.92
+    ],
+    [
+        "2026-03-30",
+        86.43,
+        88.33,
+        91.12,
+        86.12
+    ],
+    [
+        "2026-03-31",
+        91.87,
+        91.36,
+        93.78,
+        91.5
+    ],
+    [
+        "2026-04-01",
+        95.81,
+        92.45,
+        94.45,
+        94.09
+    ],
+    [
+        "2026-04-02",
+        95.42,
+        92.55,
+        94.57,
+        94.46
+    ],
+    [
+        "2026-04-06",
+        95.96,
+        93.12,
+        94.99,
+        95.46
+    ],
+    [
+        "2026-04-07",
+        97.25,
+        93.16,
+        95.07,
+        96.52
+    ],
+    [
+        "2026-04-08",
+        103.35,
+        95.86,
+        97.45,
+        102.63
+    ],
+    [
+        "2026-04-09",
+        104.7,
+        96.55,
+        98.06,
+        104.79
+    ],
+    [
+        "2026-04-10",
+        106.14,
+        96.68,
+        97.96,
+        107.2
+    ],
+    [
+        "2026-04-13",
+        108.51,
+        97.71,
+        98.95,
+        109.01
+    ],
+    [
+        "2026-04-14",
+        111.13,
+        99.47,
+        100.12,
+        111.23
+    ],
+    [
+        "2026-04-15",
+        108.91,
+        100.87,
+        100.93,
+        111.42
+    ],
+    [
+        "2026-04-16",
+        109.22,
+        101.36,
+        101.19,
+        112.5
+    ],
+    [
+        "2026-04-17",
+        111.45,
+        102.67,
+        102.41,
+        115.24
+    ],
+    [
+        "2026-04-20",
+        111.63,
+        102.35,
+        102.17,
+        115.76
+    ],
+    [
+        "2026-04-21",
+        111.41,
+        101.92,
+        101.52,
+        116.34
+    ],
+    [
+        "2026-04-22",
+        115.01,
+        103.69,
+        102.59,
+        119.5
+    ],
+    [
+        "2026-04-23",
+        115.35,
+        103.09,
+        102.16,
+        121.54
+    ],
+    [
+        "2026-04-24",
+        117.5,
+        105.1,
+        102.98,
+        126.79
+    ],
+    [
+        "2026-04-27",
+        113.57,
+        105.11,
+        103.11,
+        125.52
+    ],
+    [
+        "2026-04-28",
+        114.74,
+        104.04,
+        102.61,
+        121.03
+    ],
+    [
+        "2026-04-29",
+        121.99,
+        104.65,
+        102.56,
+        123.87
+    ],
+    [
+        "2026-04-30",
+        124.57,
+        105.67,
+        103.62,
+        126.67
+    ],
+    [
+        "2026-05-01",
+        128.16,
+        106.67,
+        103.92,
+        127.78
+    ],
+    [
+        "2026-05-04",
+        129.25,
+        106.45,
+        103.51,
+        127.05
+    ],
+    [
+        "2026-05-05",
+        135.81,
+        107.85,
+        104.35,
+        132.45
+    ],
+    [
+        "2026-05-06",
+        139.72,
+        110.1,
+        105.87,
+        138.39
+    ],
+    [
+        "2026-05-07",
+        133.9,
+        109.97,
+        105.47,
+        134.63
+    ],
+    [
+        "2026-05-08",
+        143.0,
+        112.56,
+        106.38,
+        142.04
+    ],
+    [
+        "2026-05-11",
+        150.0,
+        112.9,
+        106.59,
+        145.73
+    ],
+    [
+        "2026-05-12",
+        144.04,
+        111.91,
+        106.42,
+        141.34
+    ],
+    [
+        "2026-05-13",
+        147.35,
+        113.08,
+        107.05,
+        144.96
+    ],
+    [
+        "2026-05-14",
+        145.94,
+        113.9,
+        107.87,
+        145.64
+    ],
+    [
+        "2026-05-15",
+        140.24,
+        112.17,
+        106.55,
+        139.78
+    ],
+    [
+        "2026-05-18",
+        133.73,
+        111.66,
+        106.48,
+        136.34
+    ],
+    [
+        "2026-05-19",
+        134.44,
+        110.99,
+        105.78,
+        136.38
+    ],
+    [
+        "2026-05-20",
+        139.48,
+        112.84,
+        106.92,
+        142.5
+    ],
+    [
+        "2026-05-21",
+        146.89,
+        113.08,
+        107.12,
+        144.33
+    ],
+    [
+        "2026-05-22",
+        147.58,
+        113.56,
+        107.52,
+        147.22
+    ],
+    [
+        "2026-05-26",
+        156.49,
+        115.56,
+        108.19,
+        155.36
+    ],
+    [
+        "2026-05-27",
+        155.20,
+        115.46,
+        108.21,
+        153.25
+    ],
+    [
+        "2026-05-28",
+        156.81,
+        116.42,
+        108.83,
+        154.78
+    ],
+    [
+        "2026-05-29",
+        157.47,
+        116.85,
+        109.07,
+        154.79
+    ]
+];
+
+        // (B) 이번달 수익률(5월 성과) 기준 시점 지정
+        // 이 날짜의 지수가 0.00% 기준점이 됩니다.
+        const baseDateStr = '2026-04-30';
+
+        // (C) 월별 자산변화 데이터 (새로운 월 데이터를 맨 아래에 객체로 쉽게 추가해 주세요)
+        // 형식: { month: '월 구분명', beginning: 기초자산, deposits: 순입금액, pl: 투자손익, ending: 기말자산 }
+        const rawMonthlyData = [
+    {
+        "month": "1\uc6d4",
+        "beginning": 0,
+        "deposits": 936413,
+        "pl": 308685,
+        "ending": 1245098
+    },
+    {
+        "month": "2\uc6d4",
+        "beginning": 1245098,
+        "deposits": 1040906,
+        "pl": 240938,
+        "ending": 2526942
+    },
+    {
+        "month": "3\uc6d4",
+        "beginning": 2526940,
+        "deposits": 25349,
+        "pl": -462363,
+        "ending": 2089928
+    },
+    {
+        "month": "4\uc6d4",
+        "beginning": 2089928,
+        "deposits": 214239,
+        "pl": 1911518,
+        "ending": 4215685
+    },
+    {
+        "month": "5\uc6d4",
+        "beginning": 4215685,
+        "deposits": 63849,
+        "pl": 4475318,
+        "ending": 8754852
+    }
+];
+
+        // (D) 포트폴리오 비중 데이터 (비중 변화 정보를 관리합니다)
+        // 형식: { name: '종목명', weight: '비중(%)', change: '전월대비 변화(%)' }
+        const holdingsData = [
+            { "name": "Bloom Energy", "weight": "10.14%", "change": "+0.01%" },
+            { "name": "Lumentum", "weight": "10.08%", "change": "+10.08%" },
+            { "name": "SanDisk", "weight": "9.92%", "change": "+0.15%" },
+            { "name": "Micron", "weight": "9.82%", "change": "-0.15%" },
+            { "name": "Marvell Tech", "weight": "9.81%", "change": "-0.07%" },
+            { "name": "Western Digital", "weight": "9.62%", "change": "-0.34%" },
+            { "name": "Seagate", "weight": "9.60%", "change": "-0.55%" },
+            { "name": "Qualcomm", "weight": "8.56%", "change": "+8.56%" },
+            { "name": "AMD", "weight": "7.54%", "change": "-2.37%" },
+            { "name": "ASE Tech", "weight": "6.98%", "change": "-0.25%" },
+            { "name": "ARM", "weight": "5.28%", "change": "+5.28%" },
+            { "name": "Intel", "weight": "2.66%", "change": "-3.32%" }
+        ];
+
+        // Format raw numbers to currency strings
+        function formatKRW(val) {
+            return val.toLocaleString('ko-KR') + '원';
+        }
+
+        // ==========================================
+        // [2] 전역 공간 UI 상호작용 함수 선언
+        // 지수가 렌더링되기 전에 사용자가 터치하더라도 오류를 일으키지 않도록 사전에 완전히 글로벌 바인딩을 적용합니다.
+        // ==========================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(element => {
+                element.classList.add('hidden');
+                element.classList.remove('block');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.add('inactive');
+            });
+
+            if (tabId === 'this-month') {
+                document.getElementById('sect-this-month').classList.remove('hidden');
+                document.getElementById('sect-this-month').classList.add('block');
+                document.getElementById('tab-this-month').classList.add('active');
+                document.getElementById('tab-this-month').classList.remove('inactive');
+                setTimeout(() => { if (window.chartThisMonth) window.chartThisMonth.update(); }, 50);
+            } else if (tabId === 'cumulative') {
+                document.getElementById('sect-cumulative').classList.remove('hidden');
+                document.getElementById('sect-cumulative').classList.add('block');
+                document.getElementById('tab-cumulative').classList.add('active');
+                document.getElementById('tab-cumulative').classList.remove('inactive');
+                setTimeout(() => { if (window.chartCumulative) window.chartCumulative.update(); }, 50);
+            } else if (tabId === 'monthly-change') {
+                document.getElementById('sect-monthly-change').classList.remove('hidden');
+                document.getElementById('sect-monthly-change').classList.add('block');
+                document.getElementById('tab-monthly-change').classList.add('active');
+                document.getElementById('tab-monthly-change').classList.remove('inactive');
+                setTimeout(() => { 
+                    if (window.chartMonthly) window.chartMonthly.update(); 
+                    if (window.chartComposition) window.chartComposition.update();
+                }, 50);
+            } else if (tabId === 'portfolio-holdings') {
+                document.getElementById('sect-portfolio-holdings').classList.remove('hidden');
+                document.getElementById('sect-portfolio-holdings').classList.add('block');
+                document.getElementById('tab-portfolio-holdings').classList.add('active');
+                document.getElementById('tab-portfolio-holdings').classList.remove('inactive');
+            } else if (tabId === 'investment-rules') {
+                document.getElementById('sect-investment-rules').classList.remove('hidden');
+                document.getElementById('sect-investment-rules').classList.add('block');
+                document.getElementById('tab-investment-rules').classList.add('active');
+                document.getElementById('tab-investment-rules').classList.remove('inactive');
+            }
+        }
+
+        function toggleDataset(chartId, datasetIndex) {
+            const chart = (chartId === 'this-month') ? window.chartThisMonth : window.chartCumulative;
+            if (!chart) return;
+            const isVisible = chart.isDatasetVisible(datasetIndex);
+            
+            chart.setDatasetVisibility(datasetIndex, !isVisible);
+            chart.update();
+
+            const btn = document.getElementById(`btn-${chartId}-${datasetIndex}`);
+            if (btn) {
+                if (isVisible) {
+                    btn.classList.add('opacity-30');
+                } else {
+                    btn.classList.remove('opacity-30');
+                }
+            }
+        }
+
+        // ==========================================
+        // [3] 안전한 DOM 가속 제어 (DOMContentLoaded 래퍼 적용)
+        // 브라우저의 DOM 트리가 100% 완전하게 파싱 및 빌드된 후 실행되도록 보장하여 document.getElementById의 타이밍 문제를 원천 차단합니다.
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // (A) 일간 누적 수익률(%) 자동 계산
+            const dailyData = rawDailyPrices.map((row) => {
+                const date = row[0];
+                const portfolio_idx = row[1];
+                const nasdaq_idx = row[2];
+                const sp500_idx = row[3];
+                const phlx_idx = row[4];
+                
+                const portfolio_cum = portfolio_idx - 100.0;
+                const nasdaq_cum = nasdaq_idx - 100.0;
+                const sp500_cum = sp500_idx - 100.0;
+                const phlx_cum = phlx_idx - 100.0;
+                
+                return {
+                    date,
+                    portfolio_idx,
+                    nasdaq_idx,
+                    sp500_idx,
+                    phlx_idx,
+                    portfolio_cum: Number(portfolio_cum.toFixed(2)),
+                    nasdaq_cum: Number(nasdaq_cum.toFixed(2)),
+                    sp500_cum: Number(sp500_cum.toFixed(2)),
+                    phlx_cum: Number(phlx_cum.toFixed(2))
+                };
+            });
+
+            // (B) 이번달 수익률(%) 자동 계산 (2026-04-30을 0.00% 기준으로 적용)
+            const baseRow = rawDailyPrices.find(row => row[0] === baseDateStr) || rawDailyPrices[0];
+            const p_base = baseRow[1];
+            const n_base = baseRow[2];
+            const s_base = baseRow[3];
+            const ph_base = baseRow[4];
+
+            const mayData = rawDailyPrices
+                .filter(row => row[0] >= baseDateStr)
+                .map(row => {
+                    const date = row[0];
+                    const p_val = row[1];
+                    const n_val = row[2];
+                    const s_val = row[3];
+                    const ph_val = row[4];
+                    
+                    const portfolio_may = (p_val / p_base - 1.0) * 100.0;
+                    const nasdaq_may = (n_val / n_base - 1.0) * 100.0;
+                    const sp500_may = (s_val / s_base - 1.0) * 100.0;
+                    const phlx_may = (ph_val / ph_base - 1.0) * 100.0;
+                    
+                    return {
+                        date,
+                        portfolio_may: Number(portfolio_may.toFixed(2)),
+                        nasdaq_may: Number(nasdaq_may.toFixed(2)),
+                        sp500_may: Number(sp500_may.toFixed(2)),
+                        phlx_may: Number(phlx_may.toFixed(2))
+                    };
+                });
+
+            // 1) 최신 가용한 데이터 가져오기
+            const latestDaily = dailyData[dailyData.length - 1];
+            const latestMay = mayData[mayData.length - 1];
+            const earliestDaily = dailyData[0];
+            
+            // 2) 이번달 수익률 요약 메트릭 카드 업데이트
+            const mayPortfolioRet = latestMay.portfolio_may;
+            const mayNasdaqRet = latestMay.nasdaq_may;
+            const mayDiff = mayPortfolioRet - mayNasdaqRet;
+            
+            document.getElementById('val-this-month-ret').textContent = (mayPortfolioRet >= 0 ? '+' : '') + mayPortfolioRet.toFixed(2) + '%';
+            document.getElementById('val-this-month-diff').textContent = (mayDiff >= 0 ? '+' : '') + mayDiff.toFixed(2) + '%p';
+            document.getElementById('lbl-this-month-period').textContent = '기간: ' + baseDateStr.replace(/-/g, '.') + ' ~ ' + latestMay.date.replace(/-/g, '.');
+            document.getElementById('lbl-this-month-chart-sub').textContent = baseDateStr.replace(/-/g, '.') + '을 0.00% 기준으로 한 상대 수익률 추이';
+
+            // 3) 누적 수익률 요약 메트릭 카드 업데이트
+            const cumPortfolioRet = latestDaily.portfolio_cum;
+            const cumNasdaqRet = latestDaily.nasdaq_cum;
+            const cumDiff = cumPortfolioRet - cumNasdaqRet;
+            
+            document.getElementById('val-cum-ret').textContent = (cumPortfolioRet >= 0 ? '+' : '') + cumPortfolioRet.toFixed(2) + '%';
+            document.getElementById('val-cum-diff').textContent = (cumDiff >= 0 ? '+' : '') + cumDiff.toFixed(2) + '%p';
+            document.getElementById('lbl-cum-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + latestDaily.date.replace(/-/g, '.');
+            document.getElementById('lbl-cum-chart-sub').textContent = earliestDaily.date.replace(/-/g, '.') + '을 0.00% 기준으로 한 누적 수익률 추이';
+
+            // 4) 월별 자산변화 요약 메트릭 카드 업데이트
+            const latestMonthObj = rawMonthlyData[rawMonthlyData.length - 1];
+            const totalPL = rawMonthlyData.reduce((acc, cur) => acc + cur.pl, 0);
+            
+            document.getElementById('lbl-assets-final-month').textContent = '총 자산 (' + latestMonthObj.month + '말 기준)';
+            document.getElementById('val-total-assets').textContent = formatKRW(latestMonthObj.ending);
+            document.getElementById('val-cum-pl').textContent = (totalPL >= 0 ? '+' : '') + formatKRW(totalPL);
+
+            // 5) 포트폴리오 요약 메트릭 카드 업데이트
+            document.getElementById('val-holdings-count').textContent = holdingsData.length + '개';
+
+            // 6) 월별 자산변화 리스트 데이터 테이블 채우기
+            const tableBody = document.getElementById('monthly-table-body');
+            rawMonthlyData.forEach(m => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/20 transition-colors";
+                const plClass = m.pl >= 0 ? "text-emerald-400 font-medium" : "text-rose-400 font-medium";
+                const plPrefix = m.pl > 0 ? "+" : "";
+                
+                tr.innerHTML = `
+                    <td class="py-3 font-semibold text-white">${m.month}</td>
+                    <td class="py-3 text-right text-gray-400">${formatKRW(m.beginning)}</td>
+                    <td class="py-3 text-right text-gray-300">${formatKRW(m.deposits)}</td>
+                    <td class="py-3 text-right ${plClass}">${plPrefix}${formatKRW(m.pl)}</td>
+                    <td class="py-3 text-right font-medium text-white">${formatKRW(m.ending)}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            // 7) 포트폴리오 비중 구성 데이터 테이블 채우기
+            const holdingsTableBody = document.getElementById('holdings-table-body');
+            holdingsData.forEach(h => {
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
+                const isPositive = h.change.startsWith('+');
+                const changeClass = isPositive ? "text-[#10b981]" : "text-[#ef4444]";
+                
+                tr.innerHTML = `
+                    <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
+                    <td class="py-3.5 text-right text-white font-bold">${h.weight}</td>
+                    <td class="py-3.5 text-right ${changeClass} font-bold">${h.change}</td>
+                `;
+                holdingsTableBody.appendChild(tr);
+            });
+
+            // ==========================================
+            // [4] Chart.js 그래프 구성 및 마운트
+            // ==========================================
+            const fontSettings = { family: "'Pretendard', sans-serif", size: 11 };
+            const gridSettings = { color: 'rgba(255, 255, 255, 0.06)', drawBorder: false };
+
+            // 선 차트 우측 끝단 수익률 표출 커스텀 플러그인
+            const lineEndLabelsPlugin = {
+                id: 'lineEndLabels',
+                afterDatasetsDraw(chart) {
+                    const { ctx } = chart;
+                    ctx.save();
+                    chart.data.datasets.forEach((dataset, i) => {
+                        // isDatasetVisible로 선이 활성화되어 있는지 판단하여 Off 상태 시 숫자 출력을 건너뜀
+                        if (!chart.isDatasetVisible(i)) return;
+
+                        const meta = chart.getDatasetMeta(i);
+                        const lastIndex = dataset.data.length - 1;
+                        const lastPoint = meta.data[lastIndex];
+                        if (lastPoint) {
+                            const x = lastPoint.x;
+                            const y = lastPoint.y;
+                            const val = dataset.data[lastIndex];
+                            const sign = val >= 0 ? '+' : '';
+                            const text = sign + val.toFixed(1) + '%';
+
+                            ctx.fillStyle = dataset.borderColor;
+                            ctx.font = 'bold 11px Pretendard, sans-serif';
+                            ctx.textBaseline = 'middle';
+                            ctx.textAlign = 'left';
+                            ctx.fillText(text, x + 6, y); // 글자 시작점을 끝점에서 조금 더 밀착시킵니다.
+                        }
+                    });
+                    ctx.restore();
+                }
+            };
+
+            // (1) 이번달 성과 차트 초기화
+            const ctxThisMonth = document.getElementById('chart-this-month').getContext('2d');
+            const datesThisMonth = mayData.map(d => d.date);
+            
+            window.chartThisMonth = new Chart(ctxThisMonth, {
+                type: 'line',
+                data: {
+                    labels: datesThisMonth,
+                    datasets: [
+                        {
+                            label: 'Portfolio (포트폴리오)',
+                            data: mayData.map(d => d.portfolio_may),
+                            borderColor: '#cbd5e1',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: 'Nasdaq-100 TR (나스닥 100)',
+                            data: mayData.map(d => d.nasdaq_may),
+                            borderColor: '#3b82f6',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: 'S&P500 TR (S&P 500)',
+                            data: mayData.map(d => d.sp500_may),
+                            borderColor: 'rgba(255, 255, 255, 0.6)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false,
+                            hidden: true // 기본 상태 Off 비활성화
+                        },
+                        {
+                            label: 'PHLX Semiconductor TR (반도체 지수)',
+                            data: mayData.map(d => d.phlx_may),
+                            borderColor: 'rgba(255, 255, 255, 0.35)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false,
+                            hidden: true // 기본 상태 Off 비활성화
+                        }
+                    ]
+                },
+                plugins: [lineEndLabelsPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { right: 48 } }, // 우측 여백을 80px에서 48px로 줄여 공백을 줄이고 그래프를 늘렸습니다.
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#16171d',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: fontSettings,
+                            titleFont: fontSettings,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label.split(' (')[0] || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        const sign = context.parsed.y >= 0 ? '+' : '';
+                                        label += sign + context.parsed.y.toFixed(2) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: gridSettings,
+                            ticks: { color: '#64748b', font: fontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
+                        },
+                        y: {
+                            grid: gridSettings,
+                            ticks: {
+                                color: '#64748b',
+                                font: fontSettings,
+                                callback: function(value) { return (value >= 0 ? '+' : '') + value + '%'; }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // (2) 누적 성과 차트 초기화
+            const ctxCumulative = document.getElementById('chart-cumulative').getContext('2d');
+            const datesCumulative = dailyData.map(d => d.date);
+
+            window.chartCumulative = new Chart(ctxCumulative, {
+                type: 'line',
+                data: {
+                    labels: datesCumulative,
+                    datasets: [
+                        {
+                            label: 'Portfolio (포트폴리오)',
+                            data: dailyData.map(d => d.portfolio_cum),
+                            borderColor: '#cbd5e1',
+                            borderWidth: 2.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: 'Nasdaq-100 TR (나스닥 100)',
+                            data: dailyData.map(d => d.nasdaq_cum),
+                            borderColor: '#3b82f6',
+                            borderWidth: 1.8,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: 'S&P500 TR (S&P 500)',
+                            data: dailyData.map(d => d.sp500_cum),
+                            borderColor: 'rgba(255, 255, 255, 0.6)',
+                            borderWidth: 1.5,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false,
+                            hidden: true // 기본 상태 Off 비활성화
+                        },
+                        {
+                            label: 'PHLX Semiconductor TR (반도체 지수)',
+                            data: dailyData.map(d => d.phlx_cum),
+                            borderColor: 'rgba(255, 255, 255, 0.35)',
+                            borderWidth: 1.8,
+                            pointRadius: 0,
+                            pointHoverRadius: 3,
+                            tension: 0.25,
+                            fill: false,
+                            hidden: true // 기본 상태 Off 비활성화
+                        }
+                    ]
+                },
+                plugins: [lineEndLabelsPlugin],
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { right: 48 } }, // 우측 여백을 80px에서 48px로 줄여 공백을 줄이고 그래프를 늘렸습니다.
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#16171d',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: fontSettings,
+                            titleFont: fontSettings,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label.split(' (')[0] || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        const sign = context.parsed.y >= 0 ? '+' : '';
+                                        label += sign + context.parsed.y.toFixed(2) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: gridSettings,
+                            ticks: { color: '#64748b', font: fontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }
+                        },
+                        y: {
+                            grid: gridSettings,
+                            ticks: {
+                                color: '#64748b',
+                                font: fontSettings,
+                                callback: function(value) { return (value >= 0 ? '+' : '') + value + '%'; }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // (3) 월별 자산 성장 분석 차트 초기화
+            const ctxMonthly = document.getElementById('chart-monthly').getContext('2d');
+            const months = rawMonthlyData.map(m => m.month);
+
+            window.chartMonthly = new Chart(ctxMonthly, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: '기말 자산 (Ending Assets)',
+                            data: rawMonthlyData.map(m => m.ending),
+                            borderColor: '#ffffff',
+                            borderWidth: 2.5,
+                            backgroundColor: 'transparent',
+                            pointBackgroundColor: '#ffffff',
+                            pointBorderColor: '#0b0c0e',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            zIndex: 10,
+                            fill: false,
+                            stacked: false 
+                        },
+                        {
+                            label: '기초 자산 (Beginning Assets)',
+                            data: rawMonthlyData.map(m => m.beginning),
+                            backgroundColor: 'rgba(148, 163, 184, 0.25)',
+                            borderColor: 'rgba(148, 163, 184, 0.5)',
+                            borderWidth: 1,
+                            stack: 'assets_pillar',
+                            order: 2
+                        },
+                        {
+                            label: '순 입금액 (Net Deposits)',
+                            data: rawMonthlyData.map(m => m.deposits),
+                            backgroundColor: 'rgba(59, 130, 246, 0.75)',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1,
+                            stack: 'assets_pillar',
+                            order: 2
+                        },
+                        {
+                            label: '투자 손익 (Investment P/L)',
+                            data: rawMonthlyData.map(m => m.pl),
+                            backgroundColor: function(context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                return value >= 0 ? 'rgba(16, 185, 129, 0.75)' : 'rgba(239, 68, 68, 0.75)';
+                            },
+                            borderColor: function(context) {
+                                const value = context.dataset.data[context.dataIndex];
+                                return value >= 0 ? '#10b981' : '#ef4444';
+                            },
+                            borderWidth: 1,
+                            stack: 'assets_pillar',
+                            order: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#94a3b8', font: fontSettings, boxWidth: 10, boxHeight: 10, padding: 12 }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16171d',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: fontSettings,
+                            titleFont: fontSettings,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label.split(' (')[0] || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += formatKRW(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { stacked: true, grid: gridSettings, ticks: { color: '#64748b', font: fontSettings } },
+                        y: {
+                            stacked: true, 
+                            grid: gridSettings,
+                            ticks: {
+                                color: '#64748b',
+                                font: fontSettings,
+                                callback: function(value) {
+                                    if (Math.abs(value) >= 1000000) return (value / 1000000).toFixed(1) + '백만';
+                                    return value.toLocaleString('ko-KR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // (4) 전체 계좌 구성 도넛 차트 초기화
+            const ctxComposition = document.getElementById('chart-composition').getContext('2d');
+            window.chartComposition = new Chart(ctxComposition, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Fund-Style Portfolio', 'Free-Style Portfolio'],
+                    datasets: [{
+                        data: [18.89, 81.10],
+                        backgroundColor: ['#3b82f6', '#10b981'],
+                        borderColor: '#16171d',
+                        borderWidth: 3,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                font: fontSettings,
+                                boxWidth: 12,
+                                boxHeight: 12,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#16171d',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: fontSettings,
+                            titleFont: fontSettings,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) {
+                                        label += context.parsed.toFixed(1) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
