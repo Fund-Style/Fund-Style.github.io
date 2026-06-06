@@ -56,7 +56,7 @@
                     <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">Ver 3.0</span>
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">Nasdaq-100 TR Active ETF Portfolio</p>
-                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.05.30</p>
+                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.06.07
             </div>
             
             <!-- Navigation Tabs -->
@@ -88,7 +88,7 @@
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">이번달 수익률</p>
                     <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-this-month-ret">+0.00%</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: 2026.04.30 ~ ...</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: 2026.05.29 ~ ...</p>
                 </div>
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
@@ -102,7 +102,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                     <div>
                         <h2 class="text-lg font-bold text-white">포트폴리오 성과 추이 (이번달)</h2>
-                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">2026.04.30을 0.00% 기준으로 한 상대 수익률 추이</p>
+                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">2026.05.29을 0.00% 기준으로 한 상대 수익률 추이</p>
                     </div>
                     <!-- Custom HTML Legend styled exactly matching line colors -->
                     <div class="flex flex-wrap gap-2 text-xs" id="legend-this-month">
@@ -185,8 +185,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">비교지수 상관계수</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2">0.743</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: 2026.01.28 ~ 2026.05.29</p>
+                    <p class="text-3xl font-extrabold text-emerald-400 mt-2">0.775</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: 2026.01.28 ~ 2026.06.05</p>
                 </div>
             </div>
         </section>
@@ -266,12 +266,12 @@
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Fund-Style 보유 종목 수</p>
                     <p class="text-3xl font-extrabold text-white mt-2" id="val-holdings-count">0개</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">2026.05.30 기준</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">2026.06.05 기준</p>
                 </div>
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Free-Style 보유 종목 수</p>
                     <p class="text-3xl font-extrabold text-white mt-2" id="val-freestyle-count">0개</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-freestyle-holdings-date">2026.05.30 기준</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-freestyle-holdings-date">2026.06.05 기준</p>
                 </div>
             </div>
 
@@ -279,7 +279,7 @@
             <div class="bg-[#16171d] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-white">Fund-Style Portfolio</h2>
-                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">2026-05-30 기준</p>
+                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">2026-06-05 기준</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -990,12 +990,47 @@
         116.85,
         109.07,
         154.79
+    ],
+    [
+        "2026-06-01",
+        161.62,
+        117.55,
+        109.37,
+        156.43
+    ],
+    [
+        "2026-06-02",
+        171.36,
+        118.11,
+        109.51,
+        165.62
+    ],
+    [
+        "2026-06-03",
+        173.43,
+        117.77,
+        108.71,
+        167.92
+    ],
+    [
+        "2026-06-04",
+        170.48,
+        117.16,
+        109.17,
+        164.35
+    ],
+    [
+        "2026-06-05",
+        152.25,
+        111.59,
+        106.29,
+        147.49
     ]
 ];
 
         // (B) 이번달 수익률(5월 성과) 기준 시점 지정
         // 이 날짜의 지수가 0.00% 기준점이 됩니다.
-        const baseDateStr = '2026-04-30';
+        const baseDateStr = '2026-05-29';
 
         // (C) 월별 자산변화 데이터 (새로운 월 데이터를 맨 아래에 객체로 쉽게 추가해 주세요)
         // 형식: { month: '월 구분명', beginning: 기초자산, deposits: 순입금액, pl: 투자손익, ending: 기말자산 }
@@ -1040,23 +1075,23 @@
         // (D) Fund-Style 포트폴리오 비중 데이터 (비중 변화 정보를 관리합니다)
         // 형식: { name: '종목명', weight: '비중(%)', change: '전월대비 변화(%)' }
         const holdingsData = [
-            { "name": "Bloom Energy", "weight": "10.14%", "change": "+0.01%" },
-            { "name": "Lumentum", "weight": "10.08%", "change": "+10.08%" },
-            { "name": "SanDisk", "weight": "9.92%", "change": "+0.15%" },
-            { "name": "Micron", "weight": "9.82%", "change": "-0.15%" },
-            { "name": "Marvell Tech", "weight": "9.81%", "change": "-0.07%" },
-            { "name": "Western Digital", "weight": "9.62%", "change": "-0.34%" },
-            { "name": "Seagate", "weight": "9.60%", "change": "-0.55%" },
-            { "name": "Qualcomm", "weight": "8.56%", "change": "+8.56%" },
-            { "name": "AMD", "weight": "7.54%", "change": "-2.37%" },
-            { "name": "ASE Tech", "weight": "6.98%", "change": "-0.25%" },
-            { "name": "ARM", "weight": "5.28%", "change": "+5.28%" },
-            { "name": "Intel", "weight": "2.66%", "change": "-3.32%" }
+            { "name": "Lumentum", "weight": "9.89%", "change": "-0.19%" },
+            { "name": "Bloom Energy", "weight": "9.82%", "change": "-0.32%" },
+            { "name": "Seagate", "weight": "9.76%", "change": "+0.16%" },
+            { "name": "Western Digital", "weight": "9.36%", "change": "-0.26%" },
+            { "name": "SanDisk", "weight": "9.30%", "change": "-0.62%" },
+            { "name": "Marvell Tech", "weight": "9.22%", "change": "-0.59%" },
+            { "name": "Micron", "weight": "9.10%", "change": "-0.72%" },
+            { "name": "Qualcomm", "weight": "7.56%", "change": "-1.00%" },
+            { "name": "Alphabet Class A", "weight": "7.10%", "change": "+7.10%" },
+            { "name": "AMD", "weight": "6.71%", "change": "-0.84%" },
+            { "name": "ASE Tech", "weight": "6.41%", "change": "-0.57%" },
+            { "name": "ARM", "weight": "5.77%", "change": "+0.49%" }
         ];
 
         // (E) Free-Style 포트폴리오 비중 데이터
         const freestyleHoldingsData = [
-            { "name": "3SND", "weight": "100.00%", "change": "+100.00%" }
+            { "name": "3SND", "weight": "100.00%", "change": "+0.00%" }
         ];
 
         // Format raw numbers to currency strings
