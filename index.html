@@ -56,7 +56,7 @@
                     <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">Ver 3.0</span>
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">Nasdaq-100 TR Active ETF Portfolio</p>
-                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.06.07
+                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.06.07</p>
             </div>
             
             <!-- Navigation Tabs -->
@@ -87,12 +87,12 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">이번달 수익률</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-this-month-ret">+0.00%</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-this-month-ret">+0.00%</p>
                     <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: 2026.05.29 ~ ...</p>
                 </div>
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-this-month-diff">+0.00%p</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-this-month-diff">+0.00%p</p>
                     <p class="text-[10px] text-gray-500 mt-1">초과 성과</p>
                 </div>
             </div>
@@ -138,12 +138,12 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">누적 수익률</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-ret">+0.00%</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-ret">+0.00%</p>
                     <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-period">기간: 2026.01.28 ~ ...</p>
                 </div>
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-diff">+0.00%p</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-diff">+0.00%p</p>
                     <p class="text-[10px] text-gray-500 mt-1">초과 성과</p>
                 </div>
             </div>
@@ -185,7 +185,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">비교지수 상관계수</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2">0.775</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2">0.775</p>
                     <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: 2026.01.28 ~ 2026.06.05</p>
                 </div>
             </div>
@@ -202,7 +202,7 @@
                 </div>
                 <div class="bg-[#16171d] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">누적 투자 손익</p>
-                    <p class="text-3xl font-extrabold text-emerald-400 mt-2" id="val-cum-pl">+0원</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-pl">+0원</p>
                     <p class="text-[10px] text-gray-500 mt-1">2026.01.01 ~ 현재</p>
                 </div>
             </div>
@@ -1196,7 +1196,7 @@
                 };
             });
 
-            // (B) 이번달 수익률(%) 자동 계산 (2026-04-30을 0.00% 기준으로 적용)
+            // (B) 이번달 수익률(%) 자동 계산 (2026-05-29을 0.00% 기준으로 적용)
             const baseRow = rawDailyPrices.find(row => row[0] === baseDateStr) || rawDailyPrices[0];
             const p_base = baseRow[1];
             const n_base = baseRow[2];
@@ -1231,44 +1231,89 @@
             const latestMay = mayData[mayData.length - 1];
             const earliestDaily = dailyData[0];
             
-            // 2) 이번달 수익률 요약 메트릭 카드 업데이트
+            // 2) 이번달 수익률 요약 메트릭 카드 업데이트 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const mayPortfolioRet = latestMay.portfolio_may;
             const mayNasdaqRet = latestMay.nasdaq_may;
             const mayDiff = mayPortfolioRet - mayNasdaqRet;
             
-            document.getElementById('val-this-month-ret').textContent = (mayPortfolioRet >= 0 ? '+' : '') + mayPortfolioRet.toFixed(2) + '%';
-            document.getElementById('val-this-month-diff').textContent = (mayDiff >= 0 ? '+' : '') + mayDiff.toFixed(2) + '%p';
+            const thisMonthRetEl = document.getElementById('val-this-month-ret');
+            thisMonthRetEl.textContent = (mayPortfolioRet >= 0 ? '+' : '') + mayPortfolioRet.toFixed(2) + '%';
+            if (mayPortfolioRet >= 0) {
+                thisMonthRetEl.classList.add('text-[#10c07c]');
+                thisMonthRetEl.classList.remove('text-[#f24151]');
+            } else {
+                thisMonthRetEl.classList.add('text-[#f24151]');
+                thisMonthRetEl.classList.remove('text-[#10c07c]');
+            }
+
+            const thisMonthDiffEl = document.getElementById('val-this-month-diff');
+            thisMonthDiffEl.textContent = (mayDiff >= 0 ? '+' : '') + mayDiff.toFixed(2) + '%p';
+            if (mayDiff >= 0) {
+                thisMonthDiffEl.classList.add('text-[#10c07c]');
+                thisMonthDiffEl.classList.remove('text-[#f24151]');
+            } else {
+                thisMonthDiffEl.classList.add('text-[#f24151]');
+                thisMonthDiffEl.classList.remove('text-[#10c07c]');
+            }
+
             document.getElementById('lbl-this-month-period').textContent = '기간: ' + baseDateStr.replace(/-/g, '.') + ' ~ ' + latestMay.date.replace(/-/g, '.');
             document.getElementById('lbl-this-month-chart-sub').textContent = baseDateStr.replace(/-/g, '.') + '을 0.00% 기준으로 한 상대 수익률 추이';
 
-            // 3) 누적 수익률 요약 메트릭 카드 업데이트
+            // 3) 누적 수익률 요약 메트릭 카드 업데이트 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const cumPortfolioRet = latestDaily.portfolio_cum;
             const cumNasdaqRet = latestDaily.nasdaq_cum;
             const cumDiff = cumPortfolioRet - cumNasdaqRet;
             
-            document.getElementById('val-cum-ret').textContent = (cumPortfolioRet >= 0 ? '+' : '') + cumPortfolioRet.toFixed(2) + '%';
-            document.getElementById('val-cum-diff').textContent = (cumDiff >= 0 ? '+' : '') + cumDiff.toFixed(2) + '%p';
+            const cumRetEl = document.getElementById('val-cum-ret');
+            cumRetEl.textContent = (cumPortfolioRet >= 0 ? '+' : '') + cumPortfolioRet.toFixed(2) + '%';
+            if (cumPortfolioRet >= 0) {
+                cumRetEl.classList.add('text-[#10c07c]');
+                cumRetEl.classList.remove('text-[#f24151]');
+            } else {
+                cumRetEl.classList.add('text-[#f24151]');
+                cumRetEl.classList.remove('text-[#10c07c]');
+            }
+
+            const cumDiffEl = document.getElementById('val-cum-diff');
+            cumDiffEl.textContent = (cumDiff >= 0 ? '+' : '') + cumDiff.toFixed(2) + '%p';
+            if (cumDiff >= 0) {
+                cumDiffEl.classList.add('text-[#10c07c]');
+                cumDiffEl.classList.remove('text-[#f24151]');
+            } else {
+                cumDiffEl.classList.add('text-[#f24151]');
+                cumDiffEl.classList.remove('text-[#10c07c]');
+            }
+
             document.getElementById('lbl-cum-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + latestDaily.date.replace(/-/g, '.');
             document.getElementById('lbl-cum-chart-sub').textContent = earliestDaily.date.replace(/-/g, '.') + '을 0.00% 기준으로 한 누적 수익률 추이';
 
-            // 4) 월별 자산변화 요약 메트릭 카드 업데이트
+            // 4) 월별 자산변화 요약 메트릭 카드 업데이트 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const latestMonthObj = rawMonthlyData[rawMonthlyData.length - 1];
             const totalPL = rawMonthlyData.reduce((acc, cur) => acc + cur.pl, 0);
             
             document.getElementById('lbl-assets-final-month').textContent = '총 자산 (' + latestMonthObj.month + '말 기준)';
             document.getElementById('val-total-assets').textContent = formatKRW(latestMonthObj.ending);
-            document.getElementById('val-cum-pl').textContent = (totalPL >= 0 ? '+' : '') + formatKRW(totalPL);
+            
+            const cumPLEl = document.getElementById('val-cum-pl');
+            cumPLEl.textContent = (totalPL >= 0 ? '+' : '') + formatKRW(totalPL);
+            if (totalPL >= 0) {
+                cumPLEl.classList.add('text-[#10c07c]');
+                cumPLEl.classList.remove('text-[#f24151]');
+            } else {
+                cumPLEl.classList.add('text-[#f24151]');
+                cumPLEl.classList.remove('text-[#10c07c]');
+            }
 
             // 5) 포트폴리오 요약 메트릭 카드 업데이트
             document.getElementById('val-holdings-count').textContent = holdingsData.length + '개';
             document.getElementById('val-freestyle-count').textContent = freestyleHoldingsData.length + '개';
 
-            // 6) 월별 자산변화 리스트 데이터 테이블 채우기
+            // 6) 월별 자산변화 리스트 데이터 테이블 채우기 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const tableBody = document.getElementById('monthly-table-body');
             rawMonthlyData.forEach(m => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800/20 transition-colors";
-                const plClass = m.pl >= 0 ? "text-emerald-400 font-medium" : "text-rose-400 font-medium";
+                const plClass = m.pl >= 0 ? "text-[#10c07c] font-medium" : "text-[#f24151] font-medium";
                 const plPrefix = m.pl > 0 ? "+" : "";
                 
                 tr.innerHTML = `
@@ -1281,13 +1326,13 @@
                 tableBody.appendChild(tr);
             });
 
-            // 7) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기
+            // 7) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const holdingsTableBody = document.getElementById('holdings-table-body');
             holdingsData.forEach(h => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
                 const isPositive = h.change.startsWith('+');
-                const changeClass = isPositive ? "text-[#10b981]" : "text-[#ef4444]";
+                const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
                 
                 tr.innerHTML = `
                     <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
@@ -1297,13 +1342,13 @@
                 holdingsTableBody.appendChild(tr);
             });
 
-            // 8) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기
+            // 8) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (음수 시 차분한 크림슨 `#f24151`, 양수 시 편안한 에메랄드 `#10c07c` 적용)
             const freestyleHoldingsTableBody = document.getElementById('freestyle-holdings-table-body');
             freestyleHoldingsData.forEach(h => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
                 const isPositive = h.change.startsWith('+');
-                const changeClass = isPositive ? "text-[#10b981]" : "text-[#ef4444]";
+                const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
                 
                 tr.innerHTML = `
                     <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
@@ -1548,7 +1593,7 @@
                 }
             });
 
-            // (3) 월별 자산 성장 분석 차트 초기화
+            // (3) 월별 자산 성장 분석 차트 초기화 (바 그래프의 차트 영역도 신규 보석 톤 조율 색상과 연동 완료)
             const ctxMonthly = document.getElementById('chart-monthly').getContext('2d');
             const months = rawMonthlyData.map(m => m.month);
 
@@ -1596,11 +1641,11 @@
                             data: rawMonthlyData.map(m => m.pl),
                             backgroundColor: function(context) {
                                 const value = context.dataset.data[context.dataIndex];
-                                return value >= 0 ? 'rgba(16, 185, 129, 0.75)' : 'rgba(239, 68, 68, 0.75)';
+                                return value >= 0 ? 'rgba(16, 192, 124, 0.75)' : 'rgba(242, 65, 81, 0.75)';
                             },
                             borderColor: function(context) {
                                 const value = context.dataset.data[context.dataIndex];
-                                return value >= 0 ? '#10b981' : '#ef4444';
+                                return value >= 0 ? '#10c07c' : '#f24151';
                             },
                             borderWidth: 1,
                             stack: 'assets_pillar',
@@ -1661,7 +1706,7 @@
                     labels: ['Fund-Style Portfolio', 'Free-Style Portfolio'],
                     datasets: [{
                         data: [18.89, 81.10],
-                        backgroundColor: ['#3b82f6', '#10b981'],
+                        backgroundColor: ['#3b82f6', '#10c07c'],
                         borderColor: '#16171d',
                         borderWidth: 3,
                         hoverOffset: 4
