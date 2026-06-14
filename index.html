@@ -623,21 +623,33 @@
             }
         }
 
+        // 이번달/누적 탭 간 버튼 상태 및 데이터셋 표시 여부 동기화 함수
         function toggleDataset(chartId, datasetIndex) {
-            const chart = (chartId === 'this-month') ? window.chartThisMonth : window.chartCumulative;
-            if (!chart) return;
-            const isVisible = chart.isDatasetVisible(datasetIndex);
-            
-            chart.setDatasetVisibility(datasetIndex, !isVisible);
-            chart.update();
+            const chart1 = window.chartThisMonth;
+            const chart2 = window.chartCumulative;
+            if (!chart1 || !chart2) return;
 
-            const btn = document.getElementById(`btn-${chartId}-${datasetIndex}`);
-            if (btn) {
-                if (isVisible) {
-                    btn.classList.add('opacity-30');
-                } else {
-                    btn.classList.remove('opacity-30');
-                }
+            // 하나의 차트 상태를 기준으로 반전시킬 상태값 결정
+            const isVisible = chart1.isDatasetVisible(datasetIndex);
+            const nextVisible = !isVisible;
+
+            // 두 차트의 가시성 상태를 동기화하여 업데이트
+            chart1.setDatasetVisibility(datasetIndex, nextVisible);
+            chart1.update();
+
+            chart2.setDatasetVisibility(datasetIndex, nextVisible);
+            chart2.update();
+
+            // 두 탭의 버튼 활성화 스타일 동기화
+            const btnThisMonth = document.getElementById(`btn-this-month-${datasetIndex}`);
+            const btnCumulative = document.getElementById(`btn-cumulative-${datasetIndex}`);
+
+            if (nextVisible) {
+                if (btnThisMonth) btnThisMonth.classList.remove('opacity-30');
+                if (btnCumulative) btnCumulative.classList.remove('opacity-30');
+            } else {
+                if (btnThisMonth) btnThisMonth.classList.add('opacity-30');
+                if (btnCumulative) btnCumulative.classList.add('opacity-30');
             }
         }
 
