@@ -15,19 +15,24 @@
             background-color: #06070a;
             color: #e2e8f0;
         }
+        
+        /* 활성화된 탭 버튼 스타일 (글자 색상 #D9DDE6 유지 및 글자 굵기 효과 복원) */
         .tab-btn.active {
-            background-color: #ffffff;
-            color: #0b0c0e;
+            background-color: #1b1d26;
+            color: #D9DDE6;
             font-weight: 600;
         }
+        
+        /* 기존 비활성화 탭 버튼 상태 (원본 그대로 유지) */
         .tab-btn.inactive {
             background-color: #121319;
             color: #94a3b8;
         }
         .tab-btn.inactive:hover {
             background-color: #1b1d26;
-            color: #ffffff;
+            color: #D9DDE6;
         }
+        
         /* Beautiful scrollbar styling */
         ::-webkit-scrollbar {
             width: 6px;
@@ -43,6 +48,13 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #252834;
         }
+
+        /* 세로형 화면 비율(Portrait) 또는 모바일 환경에서 전체 rem 폰트 크기 스케일 다운 */
+        @media (orientation: portrait) or (max-width: 640px) {
+            html {
+                font-size: 87.5%; /* 기존 기본값(16px) 대비 14px로 축소하여 레이아웃 내 글자 크기 비율 유지 */
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col pb-12">
@@ -51,12 +63,12 @@
         <!-- Header -->
         <header class="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
             <div>
-                <h1 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                <h1 class="text-2xl font-bold tracking-tight text-[#D9DDE6] flex items-center gap-2">
                     <span>Fund-Style Portfolio</span>
                     <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">Ver 3.0</span>
                 </h1>
                 <p class="text-sm text-gray-400 mt-1">Nasdaq-100 TR Active ETF Portfolio</p>
-                <p class="text-xs text-gray-500 mt-0.5">기준일 : 2026.06.07</p>
+                <p class="text-xs text-gray-500 mt-0.5" id="lbl-header-date">기준일 : </p>
             </div>
             
             <!-- Navigation Tabs -->
@@ -88,7 +100,7 @@
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">이번달 수익률</p>
                     <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-this-month-ret">+0.00%</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: 2026.05.29 ~ ...</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-this-month-period">기간: ~ </p>
                 </div>
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
@@ -101,8 +113,8 @@
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                     <div>
-                        <h2 class="text-lg font-bold text-white">포트폴리오 성과 추이 (이번달)</h2>
-                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">2026.05.29을 0.00% 기준으로 한 상대 수익률 추이</p>
+                        <h2 class="text-lg font-bold text-[#D9DDE6]">포트폴리오 성과 추이 (이번달)</h2>
+                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">상대 수익률 추이</p>
                     </div>
                     <!-- Custom HTML Legend styled exactly matching line colors -->
                     <div class="flex flex-wrap gap-2 text-xs" id="legend-this-month">
@@ -116,12 +128,12 @@
                         </button>
                         <!-- 기본 비활성화 처리 (opacity-30 추가) -->
                         <button id="btn-this-month-2" onclick="toggleDataset('this-month', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.6)]"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
                             <span>S&P500 TR</span>
                         </button>
                         <!-- 기본 비활성화 처리 (opacity-30 추가) -->
                         <button id="btn-this-month-3" onclick="toggleDataset('this-month', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.35)]"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
                             <span>PHLX TR</span>
                         </button>
                     </div>
@@ -139,7 +151,7 @@
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">누적 수익률</p>
                     <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-ret">+0.00%</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-period">기간: 2026.01.28 ~ ...</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-period">기간: ~ </p>
                 </div>
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Nasdaq-100 TR 대비</p>
@@ -152,8 +164,8 @@
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
                     <div>
-                        <h2 class="text-lg font-bold text-white">포트폴리오 성과 추이 (누적)</h2>
-                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-cum-chart-sub">2026.01.28을 0.00% 기준으로 한 누적 수익률 추이</p>
+                        <h2 class="text-lg font-bold text-[#D9DDE6]">포트폴리오 성과 추이 (누적)</h2>
+                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-cum-chart-sub">누적 수익률 추이</p>
                     </div>
                     <!-- Custom HTML Legend styled exactly matching line colors -->
                     <div class="flex flex-wrap gap-2 text-xs" id="legend-cumulative">
@@ -167,12 +179,12 @@
                         </button>
                         <!-- 기본 비활성화 처리 (opacity-30 추가) -->
                         <button id="btn-cumulative-2" onclick="toggleDataset('cumulative', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.6)]"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
                             <span>S&P500 TR</span>
                         </button>
                         <!-- 기본 비활성화 처리 (opacity-30 추가) -->
                         <button id="btn-cumulative-3" onclick="toggleDataset('cumulative', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(255,255,255,0.35)]"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
                             <span>PHLX TR</span>
                         </button>
                     </div>
@@ -185,8 +197,8 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">비교지수 상관계수</p>
-                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2">0.775</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: 2026.01.28 ~ 2026.06.05</p>
+                    <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-correlation">0.000</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-cum-correlation-period">기간: ~ </p>
                 </div>
             </div>
         </section>
@@ -197,13 +209,13 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400" id="lbl-assets-final-month">총 자산 (5월말 기준)</p>
-                    <p class="text-3xl font-extrabold text-white mt-2" id="val-total-assets">0원</p>
+                    <p class="text-3xl font-extrabold text-[#D9DDE6] mt-2" id="val-total-assets">0원</p>
                     <p class="text-[10px] text-gray-500 mt-1">기말 최종 자산총액</p>
                 </div>
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">누적 투자 손익</p>
                     <p class="text-3xl font-extrabold text-[#10c07c] mt-2" id="val-cum-pl">+0원</p>
-                    <p class="text-[10px] text-gray-500 mt-1">2026.01.01 ~ 현재</p>
+                    <p class="text-[10px] text-gray-500 mt-1">2026.01.01 ~ 2026.05.30</p>
                 </div>
             </div>
 
@@ -214,7 +226,7 @@
                     <!-- 1. Monthly Asset Growth Analysis Card (2열 가로 길이 차지) -->
                     <div class="lg:col-span-2 bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
                         <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-base font-bold text-white">월별 자산 변동 분석</h2>
+                            <h2 class="text-base font-bold text-[#D9DDE6]">월별 자산 변동 분석</h2>
                             <span class="text-[10px] text-gray-500">단위: 원</span>
                         </div>
                         <div class="h-[320px] w-full relative">
@@ -225,11 +237,12 @@
                     <!-- 2. Doughnut Chart Card (전체 계좌 구성) (1열 가로 길이 차지) -->
                     <div class="lg:col-span-1 bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
                         <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-base font-bold text-white">전체 계좌 구성</h2>
+                            <h2 class="text-base font-bold text-[#D9DDE6]">전체 계좌 구성</h2>
                         </div>
                         <!-- 가로 배치 시 막대그래프 카드와 일치하도록 높이를 h-[320px]로 통일 -->
                         <div class="h-[320px] w-full relative flex items-center justify-center">
-                            <div class="w-full max-w-[320px] h-full">
+                            <!-- relative 클래스를 추가하여 차트 크기 왜곡 현상 방지 -->
+                            <div class="w-full max-w-[320px] h-full relative">
                                 <canvas id="chart-composition"></canvas>
                             </div>
                         </div>
@@ -238,7 +251,7 @@
 
                 <!-- 3. Monthly Asset Change List Table Card (전체 가로폭 유지) -->
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md w-full flex flex-col">
-                    <h2 class="text-base font-bold text-white mb-3">월별 자산변화 내역</h2>
+                    <h2 class="text-base font-bold text-[#D9DDE6] mb-3">월별 자산변화 내역</h2>
                     <div class="overflow-x-auto flex-grow">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -265,21 +278,21 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Fund-Style 보유 종목 수</p>
-                    <p class="text-3xl font-extrabold text-white mt-2" id="val-holdings-count">0개</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">2026.06.05 기준</p>
+                    <p class="text-3xl font-extrabold text-[#D9DDE6] mt-2" id="val-holdings-count">0개</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-holdings-date">기준</p>
                 </div>
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md">
                     <p class="text-xs font-medium text-gray-400">Free-Style 보유 종목 수</p>
-                    <p class="text-3xl font-extrabold text-white mt-2" id="val-freestyle-count">0개</p>
-                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-freestyle-holdings-date">2026.06.05 기준</p>
+                    <p class="text-3xl font-extrabold text-[#D9DDE6] mt-2" id="val-freestyle-count">0개</p>
+                    <p class="text-[10px] text-gray-500 mt-1" id="lbl-freestyle-holdings-date">기준</p>
                 </div>
             </div>
 
             <!-- Fund-Style Portfolio Block -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-white">Fund-Style Portfolio</h2>
-                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">2026-06-05 기준</p>
+                    <h2 class="text-xl font-bold text-[#D9DDE6]">Fund-Style Portfolio</h2>
+                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">기준</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -300,8 +313,8 @@
             <!-- Free-Style Portfolio Block -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="mb-4">
-                    <h2 class="text-xl font-bold text-white">Free-Style Portfolio</h2>
-                    <p class="text-xs text-gray-400 mt-1" id="lbl-freestyle-holdings-table-date">2026-05-30 기준</p>
+                    <h2 class="text-xl font-bold text-[#D9DDE6]">Free-Style Portfolio</h2>
+                    <p class="text-xs text-gray-400 mt-1" id="lbl-freestyle-holdings-table-date">기준</p>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -325,7 +338,7 @@
             <!-- Rules Card -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
                 <div class="mb-6">
-                    <h2 class="text-xl font-bold text-white">펀드식 포트폴리오 운용규칙</h2>
+                    <h2 class="text-xl font-bold text-[#D9DDE6]">펀드식 포트폴리오 운용규칙</h2>
                     <p class="text-xs text-gray-400 mt-1">시행일자: 2026.05.26 ~ 현재</p>
                 </div>
                 
@@ -389,705 +402,174 @@
     <!-- Embedded JSON Data and JS Core -->
     <script>
         // ==========================================
-        // [1] 수정 가능한 원본 데이터 세트
-        // 누적/이번달 수익률 등의 모든 계산은 자동으로 수행됩니다.
+        // [1] 수정 가능한 원본 데이터 세트 (가로형 포맷 적용)
         // ==========================================
 
-        // (A) 일간 지수 데이터
         const rawDailyPrices = [
-    [
-        "2026-01-28",
-        100.0,
-        100.0,
-        100.0,
-        100.0
-    ],
-    [
-        "2026-01-29",
-        100.22,
-        99.47,
-        99.87,
-        100.16
-    ],
-    [
-        "2026-01-30",
-        98.55,
-        98.2,
-        99.45,
-        96.32
-    ],
-    [
-        "2026-02-02",
-        100.78,
-        98.92,
-        99.99,
-        97.96
-    ],
-    [
-        "2026-02-03",
-        99.17,
-        97.38,
-        99.15,
-        95.93
-    ],
-    [
-        "2026-02-04",
-        95.97,
-        95.66,
-        98.65,
-        91.75
-    ],
-    [
-        "2026-02-05",
-        95.22,
-        94.35,
-        97.44,
-        91.7
-    ],
-    [
-        "2026-02-06",
-        99.85,
-        96.37,
-        99.36,
-        96.92
-    ],
-    [
-        "2026-02-09",
-        99.91,
-        97.12,
-        99.84,
-        98.29
-    ],
-    [
-        "2026-02-10",
-        96.83,
-        96.58,
-        99.51,
-        97.63
-    ],
-    [
-        "2026-02-11",
-        99.87,
-        96.87,
-        99.51,
-        99.86
-    ],
-    [
-        "2026-02-12",
-        100.14,
-        94.89,
-        97.96,
-        97.36
-    ],
-    [
-        "2026-02-13",
-        98.03,
-        95.08,
-        98.03,
-        98.0
-    ],
-    [
-        "2026-02-17",
-        96.28,
-        94.96,
-        98.14,
-        97.99
-    ],
-    [
-        "2026-02-18",
-        97.83,
-        95.72,
-        98.69,
-        98.93
-    ],
-    [
-        "2026-02-19",
-        96.73,
-        95.34,
-        98.42,
-        98.44
-    ],
-    [
-        "2026-02-20",
-        98.72,
-        96.17,
-        99.11,
-        99.49
-    ],
-    [
-        "2026-02-23",
-        97.84,
-        95.01,
-        98.08,
-        98.94
-    ],
-    [
-        "2026-02-24",
-        98.44,
-        96.04,
-        98.84,
-        100.38
-    ],
-    [
-        "2026-02-25",
-        99.8,
-        97.39,
-        99.65,
-        102.01
-    ],
-    [
-        "2026-02-26",
-        97.78,
-        96.26,
-        99.11,
-        98.75
-    ],
-    [
-        "2026-02-27",
-        97.19,
-        95.98,
-        98.69,
-        97.56
-    ],
-    [
-        "2026-03-02",
-        95.96,
-        96.11,
-        98.74,
-        98.03
-    ],
-    [
-        "2026-03-03",
-        92.38,
-        95.07,
-        97.81,
-        93.56
-    ],
-    [
-        "2026-03-04",
-        94.91,
-        96.51,
-        98.57,
-        95.37
-    ],
-    [
-        "2026-03-05",
-        93.61,
-        96.23,
-        98.02,
-        94.27
-    ],
-    [
-        "2026-03-06",
-        90.38,
-        94.79,
-        96.73,
-        90.57
-    ],
-    [
-        "2026-03-09",
-        94.44,
-        96.05,
-        97.54,
-        94.13
-    ],
-    [
-        "2026-03-10",
-        95.86,
-        96.0,
-        97.35,
-        94.79
-    ],
-    [
-        "2026-03-11",
-        97.43,
-        96.04,
-        97.27,
-        95.38
-    ],
-    [
-        "2026-03-12",
-        94.81,
-        94.38,
-        95.79,
-        92.11
-    ],
-    [
-        "2026-03-13",
-        96.51,
-        93.81,
-        95.22,
-        92.16
-    ],
-    [
-        "2026-03-16",
-        99.31,
-        94.86,
-        96.2,
-        93.96
-    ],
-    [
-        "2026-03-17",
-        102.65,
-        95.35,
-        96.44,
-        94.46
-    ],
-    [
-        "2026-03-18",
-        101.57,
-        93.98,
-        95.13,
-        93.96
-    ],
-    [
-        "2026-03-19",
-        102.07,
-        93.71,
-        94.87,
-        94.78
-    ],
-    [
-        "2026-03-20",
-        97.78,
-        91.96,
-        93.44,
-        92.46
-    ],
-    [
-        "2026-03-23",
-        98.24,
-        93.08,
-        94.52,
-        93.71
-    ],
-    [
-        "2026-03-24",
-        98.02,
-        92.36,
-        94.16,
-        94.91
-    ],
-    [
-        "2026-03-25",
-        97.37,
-        92.98,
-        94.68,
-        96.07
-    ],
-    [
-        "2026-03-26",
-        91.26,
-        90.77,
-        93.03,
-        91.47
-    ],
-    [
-        "2026-03-27",
-        90.77,
-        89.02,
-        91.48,
-        89.92
-    ],
-    [
-        "2026-03-30",
-        86.43,
-        88.33,
-        91.12,
-        86.12
-    ],
-    [
-        "2026-03-31",
-        91.87,
-        91.36,
-        93.78,
-        91.5
-    ],
-    [
-        "2026-04-01",
-        95.81,
-        92.45,
-        94.45,
-        94.09
-    ],
-    [
-        "2026-04-02",
-        95.42,
-        92.55,
-        94.57,
-        94.46
-    ],
-    [
-        "2026-04-06",
-        95.96,
-        93.12,
-        94.99,
-        95.46
-    ],
-    [
-        "2026-04-07",
-        97.25,
-        93.16,
-        95.07,
-        96.52
-    ],
-    [
-        "2026-04-08",
-        103.35,
-        95.86,
-        97.45,
-        102.63
-    ],
-    [
-        "2026-04-09",
-        104.7,
-        96.55,
-        98.06,
-        104.79
-    ],
-    [
-        "2026-04-10",
-        106.14,
-        96.68,
-        97.96,
-        107.2
-    ],
-    [
-        "2026-04-13",
-        108.51,
-        97.71,
-        98.95,
-        109.01
-    ],
-    [
-        "2026-04-14",
-        111.13,
-        99.47,
-        100.12,
-        111.23
-    ],
-    [
-        "2026-04-15",
-        108.91,
-        100.87,
-        100.93,
-        111.42
-    ],
-    [
-        "2026-04-16",
-        109.22,
-        101.36,
-        101.19,
-        112.5
-    ],
-    [
-        "2026-04-17",
-        111.45,
-        102.67,
-        102.41,
-        115.24
-    ],
-    [
-        "2026-04-20",
-        111.63,
-        102.35,
-        102.17,
-        115.76
-    ],
-    [
-        "2026-04-21",
-        111.41,
-        101.92,
-        101.52,
-        116.34
-    ],
-    [
-        "2026-04-22",
-        115.01,
-        103.69,
-        102.59,
-        119.5
-    ],
-    [
-        "2026-04-23",
-        115.35,
-        103.09,
-        102.16,
-        121.54
-    ],
-    [
-        "2026-04-24",
-        117.5,
-        105.1,
-        102.98,
-        126.79
-    ],
-    [
-        "2026-04-27",
-        113.57,
-        105.11,
-        103.11,
-        125.52
-    ],
-    [
-        "2026-04-28",
-        114.74,
-        104.04,
-        102.61,
-        121.03
-    ],
-    [
-        "2026-04-29",
-        121.99,
-        104.65,
-        102.56,
-        123.87
-    ],
-    [
-        "2026-04-30",
-        124.57,
-        105.67,
-        103.62,
-        126.67
-    ],
-    [
-        "2026-05-01",
-        128.16,
-        106.67,
-        103.92,
-        127.78
-    ],
-    [
-        "2026-05-04",
-        129.25,
-        106.45,
-        103.51,
-        127.05
-    ],
-    [
-        "2026-05-05",
-        135.81,
-        107.85,
-        104.35,
-        132.45
-    ],
-    [
-        "2026-05-06",
-        139.72,
-        110.1,
-        105.87,
-        138.39
-    ],
-    [
-        "2026-05-07",
-        133.9,
-        109.97,
-        105.47,
-        134.63
-    ],
-    [
-        "2026-05-08",
-        143.0,
-        112.56,
-        106.38,
-        142.04
-    ],
-    [
-        "2026-05-11",
-        150.0,
-        112.9,
-        106.59,
-        145.73
-    ],
-    [
-        "2026-05-12",
-        144.04,
-        111.91,
-        106.42,
-        141.34
-    ],
-    [
-        "2026-05-13",
-        147.35,
-        113.08,
-        107.05,
-        144.96
-    ],
-    [
-        "2026-05-14",
-        145.94,
-        113.9,
-        107.87,
-        145.64
-    ],
-    [
-        "2026-05-15",
-        140.24,
-        112.17,
-        106.55,
-        139.78
-    ],
-    [
-        "2026-05-18",
-        133.73,
-        111.66,
-        106.48,
-        136.34
-    ],
-    [
-        "2026-05-19",
-        134.44,
-        110.99,
-        105.78,
-        136.38
-    ],
-    [
-        "2026-05-20",
-        139.48,
-        112.84,
-        106.92,
-        142.5
-    ],
-    [
-        "2026-05-21",
-        146.89,
-        113.08,
-        107.12,
-        144.33
-    ],
-    [
-        "2026-05-22",
-        147.58,
-        113.56,
-        107.52,
-        147.22
-    ],
-    [
-        "2026-05-26",
-        156.49,
-        115.56,
-        108.19,
-        155.36
-    ],
-    [
-        "2026-05-27",
-        155.20,
-        115.46,
-        108.21,
-        153.25
-    ],
-    [
-        "2026-05-28",
-        156.81,
-        116.42,
-        108.83,
-        154.78
-    ],
-    [
-        "2026-05-29",
-        157.47,
-        116.85,
-        109.07,
-        154.79
-    ],
-    [
-        "2026-06-01",
-        161.62,
-        117.55,
-        109.37,
-        156.43
-    ],
-    [
-        "2026-06-02",
-        171.36,
-        118.11,
-        109.51,
-        165.62
-    ],
-    [
-        "2026-06-03",
-        173.43,
-        117.77,
-        108.71,
-        167.92
-    ],
-    [
-        "2026-06-04",
-        170.48,
-        117.16,
-        109.17,
-        164.35
-    ],
-    [
-        "2026-06-05",
-        152.25,
-        111.59,
-        106.29,
-        147.49
-    ]
-];
+            ["2026-01-28", 100.00, 100.00, 100.00, 100.00],
+            ["2026-01-29", 100.22, 99.47, 99.87, 100.16],
+            ["2026-01-30", 98.55, 98.20, 99.45, 96.32],
+            ["2026-02-02", 100.78, 98.92, 99.99, 97.96],
+            ["2026-02-03", 99.17, 97.38, 99.15, 95.93],
+            ["2026-02-04", 95.97, 95.66, 98.65, 91.75],
+            ["2026-02-05", 95.22, 94.35, 97.44, 91.70],
+            ["2026-02-06", 99.85, 96.37, 99.36, 96.92],
+            ["2026-02-09", 99.91, 97.12, 99.84, 98.29],
+            ["2026-02-10", 96.83, 96.58, 99.51, 97.63],
+            ["2026-02-11", 99.87, 96.87, 99.51, 99.86],
+            ["2026-02-12", 100.14, 94.89, 97.96, 97.36],
+            ["2026-02-13", 98.03, 95.08, 98.03, 98.00],
+            ["2026-02-17", 96.28, 94.96, 98.14, 97.99],
+            ["2026-02-18", 97.83, 95.72, 98.69, 98.93],
+            ["2026-02-19", 96.73, 95.34, 98.42, 98.44],
+            ["2026-02-20", 98.72, 96.17, 99.11, 99.49],
+            ["2026-02-23", 97.84, 95.01, 98.08, 98.94],
+            ["2026-02-24", 98.44, 96.04, 98.84, 100.38],
+            ["2026-02-25", 99.80, 97.39, 99.65, 102.01],
+            ["2026-02-26", 97.78, 96.26, 99.11, 98.75],
+            ["2026-02-27", 97.19, 95.98, 98.69, 97.56],
+            ["2026-03-02", 95.96, 96.11, 98.74, 98.03],
+            ["2026-03-03", 92.38, 95.07, 97.81, 93.56],
+            ["2026-03-04", 94.91, 96.51, 98.57, 95.37],
+            ["2026-03-05", 93.61, 96.23, 98.02, 94.27],
+            ["2026-03-06", 90.38, 94.79, 96.73, 90.57],
+            ["2026-03-09", 94.44, 96.05, 97.54, 94.13],
+            ["2026-03-10", 95.86, 96.00, 97.35, 94.79],
+            ["2026-03-11", 97.43, 96.04, 97.27, 95.38],
+            ["2026-03-12", 94.81, 94.38, 95.79, 92.11],
+            ["2026-03-13", 96.51, 93.81, 95.22, 92.16],
+            ["2026-03-16", 99.31, 94.86, 96.20, 93.96],
+            ["2026-03-17", 102.65, 95.35, 96.44, 94.46],
+            ["2026-03-18", 101.57, 93.98, 95.13, 93.96],
+            ["2026-03-19", 102.07, 93.71, 94.87, 94.78],
+            ["2026-03-20", 97.78, 91.96, 93.44, 92.46],
+            ["2026-03-23", 98.24, 93.08, 94.52, 93.71],
+            ["2026-03-24", 98.02, 92.36, 94.16, 94.91],
+            ["2026-03-25", 97.37, 92.98, 94.68, 96.07],
+            ["2026-03-26", 91.26, 90.77, 93.03, 91.47],
+            ["2026-03-27", 90.77, 89.02, 91.48, 89.92],
+            ["2026-03-30", 86.43, 88.33, 91.12, 86.12],
+            ["2026-03-31", 91.87, 91.36, 93.78, 91.50],
+            ["2026-04-01", 95.81, 92.45, 94.45, 94.09],
+            ["2026-04-02", 95.42, 92.55, 94.57, 94.46],
+            ["2026-04-06", 95.96, 93.12, 94.99, 95.46],
+            ["2026-04-07", 97.25, 93.16, 95.07, 96.52],
+            ["2026-04-08", 103.35, 95.86, 97.45, 102.63],
+            ["2026-04-09", 104.70, 96.55, 98.06, 104.78],
+            ["2026-04-10", 106.14, 96.68, 97.96, 107.20],
+            ["2026-04-13", 108.51, 97.71, 98.95, 109.01],
+            ["2026-04-14", 111.13, 99.47, 100.12, 111.23],
+            ["2026-04-15", 108.91, 100.87, 100.93, 111.42],
+            ["2026-04-16", 109.22, 101.36, 101.19, 112.50],
+            ["2026-04-17", 111.45, 102.67, 102.41, 115.23],
+            ["2026-04-20", 111.63, 102.35, 102.17, 115.76],
+            ["2026-04-21", 111.41, 101.92, 101.52, 116.34],
+            ["2026-04-22", 115.01, 103.69, 102.59, 119.50],
+            ["2026-04-23", 115.35, 103.09, 102.16, 121.54],
+            ["2026-04-24", 117.50, 105.10, 102.98, 126.78],
+            ["2026-04-27", 113.57, 105.11, 103.11, 125.52],
+            ["2026-04-28", 114.74, 104.04, 102.61, 121.03],
+            ["2026-04-29", 121.99, 104.65, 102.56, 123.87],
+            ["2026-04-30", 124.57, 105.67, 103.62, 126.67],
+            ["2026-05-01", 128.16, 106.67, 103.92, 127.78],
+            ["2026-05-04", 129.25, 106.45, 103.51, 127.05],
+            ["2026-05-05", 135.81, 107.85, 104.35, 132.45],
+            ["2026-05-06", 139.72, 110.10, 105.87, 138.39],
+            ["2026-05-07", 133.91, 109.97, 105.47, 134.63],
+            ["2026-05-08", 143.00, 112.56, 106.38, 142.04],
+            ["2026-05-11", 150.00, 112.90, 106.59, 145.73],
+            ["2026-05-12", 144.04, 111.91, 106.42, 141.34],
+            ["2026-05-13", 147.35, 113.08, 107.05, 144.96],
+            ["2026-05-14", 145.94, 113.90, 107.87, 145.64],
+            ["2026-05-15", 140.24, 112.17, 106.55, 139.78],
+            ["2026-05-18", 133.73, 111.66, 106.48, 136.34],
+            ["2026-05-19", 134.44, 110.99, 105.78, 136.38],
+            ["2026-05-20", 139.48, 112.84, 106.92, 142.50],
+            ["2026-05-21", 146.89, 113.08, 107.12, 144.33],
+            ["2026-05-22", 147.58, 113.56, 107.52, 147.22],
+            ["2026-05-26", 156.49, 115.56, 108.19, 155.36],
+            ["2026-05-27", 155.20, 115.46, 108.21, 153.25],
+            ["2026-05-28", 156.81, 116.42, 108.83, 154.78],
+            ["2026-05-29", 157.47, 116.85, 109.07, 154.79],
+            ["2026-06-01", 161.62, 117.55, 109.37, 156.43],
+            ["2026-06-02", 171.36, 118.11, 109.51, 165.62],
+            ["2026-06-03", 173.43, 117.77, 108.71, 167.92],
+            ["2026-06-04", 170.47, 117.16, 109.17, 164.35],
+            ["2026-06-05", 152.25, 111.59, 106.29, 147.49],
+            ["2026-06-08", 157.63, 113.36, 106.61, 155.77],
+            ["2026-06-09", 152.95, 112.09, 106.34, 152.77],
+            ["2026-06-10", 147.10, 109.86, 104.62, 147.32],
+            ["2026-06-11", 158.89, 113.48, 106.46, 158.98],
+            ["2026-06-12", 165.63, 114.21, 107.00, 161.39]
+        ];
 
-        // (B) 이번달 수익률(5월 성과) 기준 시점 지정
-        const baseDateStr = '2026-05-29';
+        // ==========================================
+        // [1.1] 기준일 및 상관계수 전역 통제 변수
+        // ==========================================
+        const portfolioBaseDate = "2026-06-12"; // 포트폴리오 기준일 (기간 말일)
+        const thisMonthBaseDate = "2026-05-29"; // 이번달 기준일 (기간 초일)
+        const correlationCoefficient = 0.796;   // 비교지수 상관계수 (소수 표기)
+
+        // ==========================================
+        // [1.2] 포트폴리오 비중 구성 데이터 세트 (행 단위 직관적 간소화 포맷)
+        // 복사-붙여넣기 형태: ["종목명", 비중(숫자), 전월대비변동(숫자)]
+        // (★ 원자료의 뒤죽박죽인 원래 순서 그대로 붙여넣어도 출력 시 자동 정렬됩니다)
+        // ==========================================
+        const rawFundHoldings = [
+            ["Bloom Energy", 9.65, -0.49],
+            ["Lumentum Holdings", 9.64, -0.44],
+            ["SanDisk", 9.69, -0.23],
+            ["Micron", 9.55, -0.27],
+            ["Marvell Tech", 9.44, -0.37],
+            ["Western Digital", 9.69, 0.07],
+            ["Seagate", 9.70, 0.1],
+            ["AMD", 9.63, 2.09],
+            ["ASE Tech", 6.60, -0.38],
+            ["ARM", 9.86, 4.58],
+            ["NXP Semiconductors", 6.56, 6.56]
+        ];
+
+        const rawFreestyleHoldings = [
+            ["SND3", 100.00, 0.00]
+        ];
 
         // (C) 월별 자산변화 데이터
         const rawMonthlyData = [
-    {
-        "month": "1\uc6d4",
-        "beginning": 0,
-        "deposits": 936413,
-        "pl": 308685,
-        "ending": 1245098
-    },
-    {
-        "month": "2\uc6d4",
-        "beginning": 1245098,
-        "deposits": 1040906,
-        "pl": 240938,
-        "ending": 2526942
-    },
-    {
-        "month": "3\uc6d4",
-        "beginning": 2526940,
-        "deposits": 25349,
-        "pl": -462363,
-        "ending": 2089928
-    },
-    {
-        "month": "4\uc6d4",
-        "beginning": 2089928,
-        "deposits": 214239,
-        "pl": 1911518,
-        "ending": 4215685
-    },
-    {
-        "month": "5\uc6d4",
-        "beginning": 4215685,
-        "deposits": 63849,
-        "pl": 4475318,
-        "ending": 8754852
-    }
-];
-
-        // (D) Fund-Style 포트폴리오 비중 데이터
-        const holdingsData = [
-            { "name": "Lumentum", "weight": "9.89%", "change": "-0.19%" },
-            { "name": "Bloom Energy", "weight": "9.82%", "change": "-0.32%" },
-            { "name": "Seagate", "weight": "9.76%", "change": "+0.16%" },
-            { "name": "Western Digital", "weight": "9.36%", "change": "-0.26%" },
-            { "name": "SanDisk", "weight": "9.30%", "change": "-0.62%" },
-            { "name": "Marvell Tech", "weight": "9.22%", "change": "-0.59%" },
-            { "name": "Micron", "weight": "9.10%", "change": "-0.72%" },
-            { "name": "Qualcomm", "weight": "7.56%", "change": "-1.00%" },
-            { "name": "Alphabet Class A", "weight": "7.10%", "change": "+7.10%" },
-            { "name": "AMD", "weight": "6.71%", "change": "-0.84%" },
-            { "name": "ASE Tech", "weight": "6.41%", "change": "-0.57%" },
-            { "name": "ARM", "weight": "5.77%", "change": "+0.49%" }
-        ];
-
-        // (E) Free-Style 포트폴리오 비중 데이터
-        const freestyleHoldingsData = [
-            { "name": "3SND", "weight": "100.00%", "change": "+0.00%" }
+            {
+                "month": "1\uc6d4",
+                "beginning": 0,
+                "deposits": 936413,
+                "pl": 308685,
+                "ending": 1245098
+            },
+            {
+                "month": "2\uc6d4",
+                "beginning": 1245098,
+                "deposits": 1040906,
+                "pl": 240938,
+                "ending": 2526942
+            },
+            {
+                "month": "3\uc6d4",
+                "beginning": 2526940,
+                "deposits": 25349,
+                "pl": -462363,
+                "ending": 2089928
+            },
+            {
+                "month": "4\uc6d4",
+                "beginning": 2089928,
+                "deposits": 214239,
+                "pl": 1911518,
+                "ending": 4215685
+            },
+            {
+                "month": "5\uc6d4",
+                "beginning": 4215685,
+                "deposits": 63849,
+                "pl": 4475318,
+                "ending": 8754852
+            }
         ];
 
         function formatKRW(val) {
@@ -1189,15 +671,15 @@
                 };
             });
 
-            // (B) 이번달 수익률(%) 자동 계산
-            const baseRow = rawDailyPrices.find(row => row[0] === baseDateStr) || rawDailyPrices[0];
+            // (B) 이번달 수익률(%) 자동 계산 (전역 변수 기반)
+            const baseRow = rawDailyPrices.find(row => row[0] === thisMonthBaseDate) || rawDailyPrices[0];
             const p_base = baseRow[1];
             const n_base = baseRow[2];
             const s_base = baseRow[3];
             const ph_base = baseRow[4];
 
             const mayData = rawDailyPrices
-                .filter(row => row[0] >= baseDateStr)
+                .filter(row => row[0] >= thisMonthBaseDate && row[0] <= portfolioBaseDate)
                 .map(row => {
                     const date = row[0];
                     const p_val = row[1];
@@ -1224,7 +706,15 @@
             const latestMay = mayData[mayData.length - 1];
             const earliestDaily = dailyData[0];
             
-            // 2) 이번달 수익률 요약 메트릭 카드 업데이트
+            // 2) 기준일 및 상관계수 렌더링 적용 (중앙 변수 연동)
+            const formattedPortfolioBase = portfolioBaseDate.replace(/-/g, '.');
+            const formattedThisMonthBase = thisMonthBaseDate.replace(/-/g, '.');
+
+            // 헤더 날짜 및 상관계수 값 설정
+            document.getElementById('lbl-header-date').textContent = '기준일 : ' + formattedPortfolioBase;
+            document.getElementById('val-cum-correlation').textContent = correlationCoefficient.toFixed(3);
+
+            // 이번달 성과 요약 카드 및 서브텍스트
             const mayPortfolioRet = latestMay.portfolio_may;
             const mayNasdaqRet = latestMay.nasdaq_may;
             const mayDiff = mayPortfolioRet - mayNasdaqRet;
@@ -1249,10 +739,10 @@
                 thisMonthDiffEl.classList.remove('text-[#10c07c]');
             }
 
-            document.getElementById('lbl-this-month-period').textContent = '기간: ' + baseDateStr.replace(/-/g, '.') + ' ~ ' + latestMay.date.replace(/-/g, '.');
-            document.getElementById('lbl-this-month-chart-sub').textContent = baseDateStr.replace(/-/g, '.') + '을 0.00% 기준으로 한 상대 수익률 추이';
+            document.getElementById('lbl-this-month-period').textContent = '기간: ' + formattedThisMonthBase + ' ~ ' + formattedPortfolioBase;
+            document.getElementById('lbl-this-month-chart-sub').textContent = formattedThisMonthBase + '을 0.00% 기준으로 한 상대 수익률 추이';
 
-            // 3) 누적 수익률 요약 메트릭 카드 업데이트
+            // 3) 누적 수익률 요약 카드 및 서브텍스트
             const cumPortfolioRet = latestDaily.portfolio_cum;
             const cumNasdaqRet = latestDaily.nasdaq_cum;
             const cumDiff = cumPortfolioRet - cumNasdaqRet;
@@ -1277,10 +767,17 @@
                 cumDiffEl.classList.remove('text-[#10c07c]');
             }
 
-            document.getElementById('lbl-cum-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + latestDaily.date.replace(/-/g, '.');
+            document.getElementById('lbl-cum-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + formattedPortfolioBase;
             document.getElementById('lbl-cum-chart-sub').textContent = earliestDaily.date.replace(/-/g, '.') + '을 0.00% 기준으로 한 누적 수익률 추이';
+            document.getElementById('lbl-cum-correlation-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + formattedPortfolioBase;
 
-            // 4) 월별 자산변화 요약 메트릭 카드 업데이트
+            // 4) 포트폴리오 탭 기준일 통일 적용
+            document.getElementById('lbl-holdings-date').textContent = formattedPortfolioBase + ' 기준';
+            document.getElementById('lbl-freestyle-holdings-date').textContent = formattedPortfolioBase + ' 기준';
+            document.getElementById('lbl-holdings-table-date').textContent = portfolioBaseDate + ' 기준';
+            document.getElementById('lbl-freestyle-holdings-table-date').textContent = portfolioBaseDate + ' 기준';
+
+            // 5) 월별 자산변화 요약 메트릭 카드 업데이트
             const latestMonthObj = rawMonthlyData[rawMonthlyData.length - 1];
             const totalPL = rawMonthlyData.reduce((acc, cur) => acc + cur.pl, 0);
             
@@ -1297,12 +794,13 @@
                 cumPLEl.classList.remove('text-[#10c07c]');
             }
 
-            // 5) 포트폴리오 요약 메트릭 카드 업데이트
-            document.getElementById('val-holdings-count').textContent = holdingsData.length + '개';
-            document.getElementById('val-freestyle-count').textContent = freestyleHoldingsData.length + '개';
+            // 6) 포트폴리오 요약 메트릭 카드 업데이트 (간소화 데이터 길이 기준)
+            document.getElementById('val-holdings-count').textContent = rawFundHoldings.length + '개';
+            document.getElementById('val-freestyle-count').textContent = rawFreestyleHoldings.length + '개';
 
-            // 6) 월별 자산변화 리스트 데이터 테이블 채우기
+            // 7) 월별 자산변화 리스트 데이터 테이블 채우기
             const tableBody = document.getElementById('monthly-table-body');
+            tableBody.innerHTML = '';
             rawMonthlyData.forEach(m => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-gray-800/20 transition-colors";
@@ -1310,43 +808,57 @@
                 const plPrefix = m.pl > 0 ? "+" : "";
                 
                 tr.innerHTML = `
-                    <td class="py-3 font-semibold text-white">${m.month}</td>
+                    <td class="py-3 font-semibold text-[#D9DDE6]">${m.month}</td>
                     <td class="py-3 text-right text-gray-400">${formatKRW(m.beginning)}</td>
                     <td class="py-3 text-right text-gray-300">${formatKRW(m.deposits)}</td>
                     <td class="py-3 text-right ${plClass}">${plPrefix}${formatKRW(m.pl)}</td>
-                    <td class="py-3 text-right font-medium text-white">${formatKRW(m.ending)}</td>
+                    <td class="py-3 text-right font-medium text-[#D9DDE6]">${formatKRW(m.ending)}</td>
                 `;
                 tableBody.appendChild(tr);
             });
 
-            // 7) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기
+            // 8) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (출력 시 현재 비중 기준 내림차순 정렬)
             const holdingsTableBody = document.getElementById('holdings-table-body');
-            holdingsData.forEach(h => {
+            holdingsTableBody.innerHTML = '';
+            
+            // rawFundHoldings 배열을 현재 비중(weight, index 1) 기준으로 내림차순 정렬하여 새 복사 배열 생성
+            const sortedFundHoldings = [...rawFundHoldings].sort((a, b) => b[1] - a[1]);
+            
+            sortedFundHoldings.forEach(([name, weight, change]) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
-                const isPositive = h.change.startsWith('+');
+                const isPositive = change >= 0;
                 const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
+                const formattedWeight = weight.toFixed(2) + '%';
+                const formattedChange = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
                 
                 tr.innerHTML = `
-                    <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
-                    <td class="py-3.5 text-right text-white font-bold">${h.weight}</td>
-                    <td class="py-3.5 text-right ${changeClass} font-bold">${h.change}</td>
+                    <td class="py-3.5 text-gray-100 font-semibold">${name}</td>
+                    <td class="py-3.5 text-right text-[#D9DDE6] font-bold">${formattedWeight}</td>
+                    <td class="py-3.5 text-right ${changeClass} font-bold">${formattedChange}</td>
                 `;
                 holdingsTableBody.appendChild(tr);
             });
 
-            // 8) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기
+            // 9) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (출력 시 현재 비중 기준 내림차순 정렬)
             const freestyleHoldingsTableBody = document.getElementById('freestyle-holdings-table-body');
-            freestyleHoldingsData.forEach(h => {
+            freestyleHoldingsTableBody.innerHTML = '';
+            
+            // rawFreestyleHoldings 배열을 현재 비중(weight, index 1) 기준으로 내림차순 정렬하여 새 복사 배열 생성
+            const sortedFreestyleHoldings = [...rawFreestyleHoldings].sort((a, b) => b[1] - a[1]);
+            
+            sortedFreestyleHoldings.forEach(([name, weight, change]) => {
                 const tr = document.createElement('tr');
                 tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
-                const isPositive = h.change.startsWith('+');
+                const isPositive = change >= 0;
                 const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
+                const formattedWeight = weight.toFixed(2) + '%';
+                const formattedChange = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
                 
                 tr.innerHTML = `
-                    <td class="py-3.5 text-gray-100 font-semibold">${h.name}</td>
-                    <td class="py-3.5 text-right text-white font-bold">${h.weight}</td>
-                    <td class="py-3.5 text-right ${changeClass} font-bold">${h.change}</td>
+                    <td class="py-3.5 text-gray-100 font-semibold">${name}</td>
+                    <td class="py-3.5 text-right text-[#D9DDE6] font-bold">${formattedWeight}</td>
+                    <td class="py-3.5 text-right ${changeClass} font-bold">${formattedChange}</td>
                 `;
                 freestyleHoldingsTableBody.appendChild(tr);
             });
@@ -1354,8 +866,11 @@
             // ==========================================
             // [4] Chart.js 그래프 구성 및 마운트
             // ==========================================
-            const fontSettings = { family: "'Pretendard', sans-serif", size: 11 };
-            const gridSettings = { color: 'rgba(255, 255, 255, 0.06)', drawBorder: false };
+            // 화면 비율이 세로형이거나 좁을 경우 차트 내 폰트 스케일도 동적 축소(11 -> 9.5)
+            const isPortraitLayout = (window.innerHeight > window.innerWidth) || (window.innerWidth < 640);
+            const dynamicFontSize = isPortraitLayout ? 9.5 : 11;
+            const fontSettings = { family: "'Pretendard', sans-serif", size: dynamicFontSize };
+            const gridSettings = { color: 'rgba(217, 221, 230, 0.06)', drawBorder: false };
 
             const lineEndLabelsPlugin = {
                 id: 'lineEndLabels',
@@ -1376,7 +891,7 @@
                             const text = sign + val.toFixed(1) + '%';
 
                             ctx.fillStyle = dataset.borderColor;
-                            ctx.font = 'bold 11px Pretendard, sans-serif';
+                            ctx.font = `bold ${dynamicFontSize}px Pretendard, sans-serif`;
                             ctx.textBaseline = 'middle';
                             ctx.textAlign = 'left';
                             ctx.fillText(text, x + 6, y);
@@ -1418,7 +933,7 @@
                         {
                             label: 'S&P500 TR (S&P 500)',
                             data: mayData.map(d => d.sp500_may),
-                            borderColor: 'rgba(255, 255, 255, 0.6)',
+                            borderColor: 'rgba(217, 221, 230, 0.6)',
                             borderWidth: 1.5,
                             pointRadius: 0,
                             pointHoverRadius: 3,
@@ -1429,7 +944,7 @@
                         {
                             label: 'PHLX Semiconductor TR (반도체 지수)',
                             data: mayData.map(d => d.phlx_may),
-                            borderColor: 'rgba(255, 255, 255, 0.35)',
+                            borderColor: 'rgba(217, 221, 230, 0.35)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHoverRadius: 3,
@@ -1448,9 +963,9 @@
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: '#0c0d14',
-                            titleColor: '#ffffff',
+                            titleColor: '#D9DDE6',
                             bodyColor: '#e2e8f0',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
                             bodyFont: fontSettings,
@@ -1517,7 +1032,7 @@
                         {
                             label: 'S&P500 TR (S&P 500)',
                             data: dailyData.map(d => d.sp500_cum),
-                            borderColor: 'rgba(255, 255, 255, 0.6)',
+                            borderColor: 'rgba(217, 221, 230, 0.6)',
                             borderWidth: 1.5,
                             pointRadius: 0,
                             pointHoverRadius: 3,
@@ -1528,7 +1043,7 @@
                         {
                             label: 'PHLX Semiconductor TR (반도체 지수)',
                             data: dailyData.map(d => d.phlx_cum),
-                            borderColor: 'rgba(255, 255, 255, 0.35)',
+                            borderColor: 'rgba(217, 221, 230, 0.35)',
                             borderWidth: 1.8,
                             pointRadius: 0,
                             pointHoverRadius: 3,
@@ -1547,9 +1062,9 @@
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: '#0c0d14',
-                            titleColor: '#ffffff',
+                            titleColor: '#D9DDE6',
                             bodyColor: '#e2e8f0',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
                             bodyFont: fontSettings,
@@ -1597,10 +1112,10 @@
                             type: 'line',
                             label: '기말 자산 (Ending Assets)',
                             data: rawMonthlyData.map(m => m.ending),
-                            borderColor: '#ffffff',
+                            borderColor: '#D9DDE6',
                             borderWidth: 2.5,
                             backgroundColor: 'transparent',
-                            pointBackgroundColor: '#ffffff',
+                            pointBackgroundColor: '#D9DDE6',
                             pointBorderColor: '#06070a',
                             pointBorderWidth: 2,
                             pointRadius: 5,
@@ -1654,9 +1169,9 @@
                         },
                         tooltip: {
                             backgroundColor: '#0c0d14',
-                            titleColor: '#ffffff',
+                            titleColor: '#D9DDE6',
                             bodyColor: '#e2e8f0',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
                             bodyFont: fontSettings,
@@ -1720,9 +1235,9 @@
                         },
                         tooltip: {
                             backgroundColor: '#0c0d14',
-                            titleColor: '#ffffff',
+                            titleColor: '#D9DDE6',
                             bodyColor: '#e2e8f0',
-                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
                             bodyFont: fontSettings,
