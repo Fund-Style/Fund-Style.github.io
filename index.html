@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fund-Style Portfolio Dashboard</title>
+    <title>Fund-Style Portfolio</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js (Use stable UMD build from cdnjs for maximum reliability) -->
@@ -16,14 +16,14 @@
             color: #e2e8f0;
         }
         
-        /* 활성화된 탭 버튼 스타일 (글자 색상 #D9DDE6 유지 및 글자 굵기 효과 복원) */
+        /* 활성화된 탭 버튼 스타일 */
         .tab-btn.active {
             background-color: #1b1d26;
             color: #D9DDE6;
             font-weight: 600;
         }
         
-        /* 기존 비활성화 탭 버튼 상태 (원본 그대로 유지) */
+        /* 기존 비활성화 탭 버튼 상태 */
         .tab-btn.inactive {
             background-color: #121319;
             color: #94a3b8;
@@ -49,26 +49,27 @@
             background: #252834;
         }
 
-        /* 세로형 화면 비율(Portrait) 또는 모바일 환경에서 전체 rem 폰트 크기 스케일 다운 */
-        @media (orientation: portrait) or (max-width: 640px) {
-            html {
-                font-size: 87.5%; /* 기존 기본값(16px) 대비 14px로 축소하여 레이아웃 내 글자 크기 비율 유지 */
-            }
+        /* 
+           반응형 유체 공식을 적용하여 수치 도약 현상을 방지합니다.
+        */
+        html {
+            font-size: clamp(13.5px, 0.376vw + 12.15px, 16px);
+            scrollbar-gutter: stable;
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col pb-12">
     <!-- Main Container -->
     <div class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 mt-6 flex-grow">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold tracking-tight text-[#D9DDE6] flex items-center gap-2">
+        <!-- 메인 헤더 영역 (콘텐츠 너비 기반의 자연스러운 flex-wrap 정렬) -->
+        <header class="flex flex-row flex-wrap items-start md:items-center justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
+            <div class="min-w-0">
+                <h1 class="text-2xl font-bold tracking-tight text-[#D9DDE6] flex items-center flex-nowrap whitespace-nowrap gap-2">
                     <span>Fund-Style Portfolio</span>
                     <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">Ver 3.0</span>
                 </h1>
-                <p class="text-sm text-gray-400 mt-1">Nasdaq-100 TR Active ETF Portfolio</p>
-                <p class="text-xs text-gray-500 mt-0.5" id="lbl-header-date">기준일 : </p>
+                <p class="text-sm text-gray-400 mt-1 whitespace-nowrap">Nasdaq-100 TR Active ETF Portfolio</p>
+                <p class="text-xs text-gray-500 mt-0.5 whitespace-nowrap" id="lbl-header-date">기준일 : </p>
             </div>
             
             <!-- Navigation Tabs -->
@@ -111,35 +112,38 @@
 
             <!-- Chart Card -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-[#D9DDE6]">포트폴리오 성과 추이 (이번달)</h2>
-                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-this-month-chart-sub">상대 수익률 추이</p>
+                <div class="max-w-[800px] mx-auto w-full">
+                    <!-- 헤더 동적 레이아웃: 평소엔 우측 나란히 배치, 물리적 간섭이 일어나는 임계점에서만 하단으로 통째로 이동 -->
+                    <div class="flex flex-row flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-[#D9DDE6] whitespace-nowrap">포트폴리오 성과 추이 (이번달)</h2>
+                            <p class="text-xs text-gray-400 mt-0.5 whitespace-nowrap" id="lbl-this-month-chart-sub">상대 수익률 추이</p>
+                        </div>
+                        <!-- Custom HTML Legend -->
+                        <div class="flex flex-wrap gap-2 text-xs max-w-full" id="legend-this-month">
+                            <button id="btn-this-month-0" onclick="toggleDataset('this-month', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
+                                <span>Portfolio</span>
+                            </button>
+                            <button id="btn-this-month-1" onclick="toggleDataset('this-month', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+                                <span>Nasdaq-100 TR</span>
+                            </button>
+                            <!-- 기본 비활성화 처리 -->
+                            <button id="btn-this-month-2" onclick="toggleDataset('this-month', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
+                                <span>S&P500 TR</span>
+                            </button>
+                            <!-- 기본 비활성화 처리 -->
+                            <button id="btn-this-month-3" onclick="toggleDataset('this-month', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
+                                <span>PHLX TR</span>
+                            </button>
+                        </div>
                     </div>
-                    <!-- Custom HTML Legend styled exactly matching line colors -->
-                    <div class="flex flex-wrap gap-2 text-xs" id="legend-this-month">
-                        <button id="btn-this-month-0" onclick="toggleDataset('this-month', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
-                            <span>Portfolio</span>
-                        </button>
-                        <button id="btn-this-month-1" onclick="toggleDataset('this-month', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
-                            <span>Nasdaq-100 TR</span>
-                        </button>
-                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
-                        <button id="btn-this-month-2" onclick="toggleDataset('this-month', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
-                            <span>S&P500 TR</span>
-                        </button>
-                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
-                        <button id="btn-this-month-3" onclick="toggleDataset('this-month', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
-                            <span>PHLX TR</span>
-                        </button>
+                    <div class="h-[300px] sm:h-[350px] md:h-[400px] w-full relative">
+                        <canvas id="chart-this-month"></canvas>
                     </div>
-                </div>
-                <div class="h-[400px] w-full relative">
-                    <canvas id="chart-this-month"></canvas>
                 </div>
             </div>
         </section>
@@ -162,35 +166,38 @@
 
             <!-- Chart Card -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-                    <div>
-                        <h2 class="text-lg font-bold text-[#D9DDE6]">포트폴리오 성과 추이 (누적)</h2>
-                        <p class="text-xs text-gray-400 mt-0.5" id="lbl-cum-chart-sub">누적 수익률 추이</p>
+                <div class="max-w-[800px] mx-auto w-full">
+                    <!-- 헤더 동적 레이아웃: 평소엔 우측 나란히 배치, 물리적 간섭이 일어나는 임계점에서만 하단으로 통째로 이동 -->
+                    <div class="flex flex-row flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-[#D9DDE6] whitespace-nowrap">포트폴리오 성과 추이 (누적)</h2>
+                            <p class="text-xs text-gray-400 mt-0.5 whitespace-nowrap" id="lbl-cum-chart-sub">누적 수익률 추이</p>
+                        </div>
+                        <!-- Custom HTML Legend -->
+                        <div class="flex flex-wrap gap-2 text-xs max-w-full" id="legend-cumulative">
+                            <button id="btn-cumulative-0" onclick="toggleDataset('cumulative', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
+                                <span>Portfolio</span>
+                            </button>
+                            <button id="btn-cumulative-1" onclick="toggleDataset('cumulative', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
+                                <span>Nasdaq-100 TR</span>
+                            </button>
+                            <!-- 기본 비활성화 처리 -->
+                            <button id="btn-cumulative-2" onclick="toggleDataset('cumulative', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
+                                <span>S&P500 TR</span>
+                            </button>
+                            <!-- 기본 비활성화 처리 -->
+                            <button id="btn-cumulative-3" onclick="toggleDataset('cumulative', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
+                                <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
+                                <span>PHLX TR</span>
+                            </button>
+                        </div>
                     </div>
-                    <!-- Custom HTML Legend styled exactly matching line colors -->
-                    <div class="flex flex-wrap gap-2 text-xs" id="legend-cumulative">
-                        <button id="btn-cumulative-0" onclick="toggleDataset('cumulative', 0)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#cbd5e1]/40 text-[#cbd5e1] font-bold hover:border-[#cbd5e1]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[#cbd5e1]"></span>
-                            <span>Portfolio</span>
-                        </button>
-                        <button id="btn-cumulative-1" onclick="toggleDataset('cumulative', 1)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#3b82f6]/40 text-[#3b82f6] font-bold hover:border-[#3b82f6]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[#3b82f6]"></span>
-                            <span>Nasdaq-100 TR</span>
-                        </button>
-                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
-                        <button id="btn-cumulative-2" onclick="toggleDataset('cumulative', 2)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#94a3b8]/40 text-[#94a3b8] font-bold hover:border-[#94a3b8]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.6)]"></span>
-                            <span>S&P500 TR</span>
-                        </button>
-                        <!-- 기본 비활성화 처리 (opacity-30 추가) -->
-                        <button id="btn-cumulative-3" onclick="toggleDataset('cumulative', 3)" class="opacity-30 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121319] border-[#64748b]/40 text-[#64748b] font-bold hover:border-[#64748b]/80 transition-all duration-200">
-                            <span class="w-2.5 h-2.5 rounded-full bg-[rgba(217,221,230,0.35)]"></span>
-                            <span>PHLX TR</span>
-                        </button>
+                    <div class="h-[330px] sm:h-[390px] md:h-[450px] w-full relative">
+                        <canvas id="chart-cumulative"></canvas>
                     </div>
-                </div>
-                <div class="h-[400px] w-full relative">
-                    <canvas id="chart-cumulative"></canvas>
                 </div>
             </div>
             <!-- Summary Metric Cards -->
@@ -221,35 +228,32 @@
 
             <!-- Staked Layout for Premium Balance and Reading Room -->
             <div class="flex flex-col gap-6">
-                <!-- 반응형 그리드: 모바일은 1열 세로, 데스크톱(lg 이상) 해상도에서는 3열(2:1 비율)로 가로 배치 -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- 1. Monthly Asset Growth Analysis Card (2열 가로 길이 차지) -->
-                    <div class="lg:col-span-2 bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
+                <!-- 1. Monthly Asset Growth Analysis Card -->
+                <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
+                    <div class="max-w-[700px] mx-auto w-full">
                         <div class="flex items-center justify-between mb-3">
                             <h2 class="text-base font-bold text-[#D9DDE6]">월별 자산 변동 분석</h2>
                             <span class="text-[10px] text-gray-500">단위: 원</span>
                         </div>
-                        <div class="h-[320px] w-full relative">
+                        <div class="h-[320px] sm:h-[365px] md:h-[420px] w-full relative">
                             <canvas id="chart-monthly"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- 2. Doughnut Chart Card (전체 계좌 구성) (1열 가로 길이 차지) -->
-                    <div class="lg:col-span-1 bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
-                        <div class="flex items-center justify-between mb-3">
-                            <h2 class="text-base font-bold text-[#D9DDE6]">전체 계좌 구성</h2>
-                        </div>
-                        <!-- 가로 배치 시 막대그래프 카드와 일치하도록 높이를 h-[320px]로 통일 -->
-                        <div class="h-[320px] w-full relative flex items-center justify-center">
-                            <!-- relative 클래스를 추가하여 차트 크기 왜곡 현상 방지 -->
-                            <div class="w-full max-w-[320px] h-full relative">
-                                <canvas id="chart-composition"></canvas>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 3. Monthly Asset Change List Table Card (전체 가로폭 유지) -->
+                <!-- 2. Stacked Horizontal Bar Card -->
+                <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md flex flex-col justify-between w-full">
+                    <div class="max-w-[700px] mx-auto w-full">
+                        <div class="flex items-center justify-between mb-3">
+                            <h2 class="text-base font-bold text-[#D9DDE6]">전체 계좌 구성 비율</h2>
+                        </div>
+                        <div class="h-[80px] sm:h-[90px] md:h-[100px] w-full relative">
+                            <canvas id="chart-composition"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Monthly Asset Change List Table Card -->
                 <div class="bg-[#0c0d14] border border-gray-800/60 p-5 rounded-xl shadow-md w-full flex flex-col">
                     <h2 class="text-base font-bold text-[#D9DDE6] mb-3">월별 자산변화 내역</h2>
                     <div class="overflow-x-auto flex-grow">
@@ -290,45 +294,49 @@
 
             <!-- Fund-Style Portfolio Block -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-[#D9DDE6]">Fund-Style Portfolio</h2>
-                    <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">기준</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
-                                <th class="py-3">종목</th>
-                                <th class="py-3 text-right">비중</th>
-                                <th class="py-3 text-right">전월 대비 비중 변화</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="holdings-table-body">
-                            <!-- Populated dynamically via JS -->
-                        </tbody>
-                    </table>
+                <div class="max-w-[800px] mx-auto w-full">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-[#D9DDE6]">Fund-Style Portfolio</h2>
+                        <p class="text-xs text-gray-400 mt-1" id="lbl-holdings-table-date">기준</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
+                                    <th class="py-3">종목</th>
+                                    <th class="py-3 text-right">비중</th>
+                                    <th class="py-3 text-right">전월 대비 비중 변화</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="holdings-table-body">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Free-Style Portfolio Block -->
             <div class="bg-[#0c0d14] border border-gray-800/60 p-6 rounded-xl shadow-md">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold text-[#D9DDE6]">Free-Style Portfolio</h2>
-                    <p class="text-xs text-gray-400 mt-1" id="lbl-freestyle-holdings-table-date">기준</p>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
-                                <th class="py-3">종목</th>
-                                <th class="py-3 text-right">비중</th>
-                                <th class="py-3 text-right">전월 대비 비중 변화</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="freestyle-holdings-table-body">
-                            <!-- Populated dynamically via JS -->
-                        </tbody>
-                    </table>
+                <div class="max-w-[800px] mx-auto w-full">
+                    <div class="mb-4">
+                        <h2 class="text-xl font-bold text-[#D9DDE6]">Free-Style Portfolio</h2>
+                        <p class="text-xs text-gray-400 mt-1" id="lbl-freestyle-holdings-table-date">기준</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-xs font-semibold text-gray-400 tracking-wider">
+                                    <th class="py-3">종목</th>
+                                    <th class="py-3 text-right">비중</th>
+                                    <th class="py-3 text-right">전월 대비 비중 변화</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-800/40 text-sm font-medium" id="freestyle-holdings-table-body">
+                                <!-- Populated dynamically via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </section>
@@ -361,8 +369,7 @@
                     <!-- Rule 4 -->
                     <div class="flex items-start gap-4 p-4 rounded-xl bg-[#121319]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
                         <span class="flex items-center justify-center min-w-[28px] h-[28px] rounded-lg bg-blue-500/10 text-blue-400 font-bold text-sm">4</span>
-                        <p class="text-sm text-gray-300 leading-relaxed">주식의 비중을 60% 이상으로 운용한다.
-</p>
+                        <p class="text-sm text-gray-300 leading-relaxed">주식의 비중을 60% 이상으로 운용한다.</p>
                     </div>
                    <!-- Rule 5 -->
                     <div class="flex items-start gap-4 p-4 rounded-xl bg-[#121319]/30 border border-gray-800/40 hover:border-gray-700/40 transition-all duration-200">
@@ -500,34 +507,36 @@
             ["2026-06-09", 152.95, 112.09, 106.34, 152.77],
             ["2026-06-10", 147.10, 109.86, 104.62, 147.32],
             ["2026-06-11", 158.89, 113.48, 106.46, 158.98],
-            ["2026-06-12", 165.63, 114.21, 107.00, 161.39]
+            ["2026-06-12", 165.63, 114.21, 107.00, 161.39],
+            ["2026-06-15", 178.60, 117.72, 108.79, 170.18],
+            ["2026-06-16", 171.81, 115.50, 108.18, 160.46],
+            ["2026-06-17", 175.13, 114.36, 106.86, 162.67],
+            ["2026-06-18", 186.37, 117.19, 108.02, 173.11]
         ];
 
         // ==========================================
         // [1.1] 기준일 및 상관계수 전역 통제 변수
         // ==========================================
-        const portfolioBaseDate = "2026-06-12"; // 포트폴리오 기준일 (기간 말일)
+        const portfolioBaseDate = "2026-06-18"; // 포트폴리오 기준일 (기간 말일)
         const thisMonthBaseDate = "2026-05-29"; // 이번달 기준일 (기간 초일)
-        const correlationCoefficient = 0.796;   // 비교지수 상관계수 (소수 표기)
+        const correlationCoefficient = 0.809;   // 비교지수 상관계수 (소수 표기)
 
         // ==========================================
         // [1.2] 포트폴리오 비중 구성 데이터 세트 (행 단위 직관적 간소화 포맷)
-        // 복사-붙여넣기 형태: ["종목명", 비중(숫자), 전월대비변동(숫자)]
-        // (★ 원자료의 뒤죽박죽인 원래 순서 그대로 붙여넣어도 출력 시 자동 정렬됩니다)
         // ==========================================
         const rawFundHoldings = [
-            ["Bloom Energy", 9.65, -0.49],
-            ["Lumentum Holdings", 9.64, -0.44],
-            ["SanDisk", 9.69, -0.23],
-            ["Micron", 9.55, -0.27],
-            ["Marvell Tech", 9.44, -0.37],
-            ["Western Digital", 9.69, 0.07],
-            ["Seagate", 9.70, 0.1],
-            ["AMD", 9.63, 2.09],
-            ["ASE Tech", 6.60, -0.38],
-            ["ARM", 9.86, 4.58],
-            ["NXP Semiconductors", 6.56, 6.56]
-        ];
+            ["Bloom Energy", 10.13, -0.01],
+            ["Lumentum Holdings", 9.29, -0.79],
+            ["SanDisk", 9.64, -0.28],
+            ["Micron", 9.57, -0.25],
+            ["Marvell Tech", 9.14, -0.67],
+            ["Western Digital", 9.35, -0.27],
+            ["Seagate", 9.33, -0.27],
+            ["AMD", 9.59, 2.05],
+            ["ASE Tech", 9.37, 2.39],
+            ["ARM", 9.63, 4.35],
+            ["NXP Semiconductors", 4.96, 4.96]
+	];
 
         const rawFreestyleHoldings = [
             ["SND3", 100.00, 0.00]
@@ -536,39 +545,46 @@
         // (C) 월별 자산변화 데이터
         const rawMonthlyData = [
             {
-                "month": "1\uc6d4",
+                "month": "1월",
                 "beginning": 0,
                 "deposits": 936413,
                 "pl": 308685,
                 "ending": 1245098
             },
             {
-                "month": "2\uc6d4",
+                "month": "2월",
                 "beginning": 1245098,
                 "deposits": 1040906,
                 "pl": 240938,
                 "ending": 2526942
             },
             {
-                "month": "3\uc6d4",
+                "month": "3월",
                 "beginning": 2526940,
                 "deposits": 25349,
                 "pl": -462363,
                 "ending": 2089928
             },
             {
-                "month": "4\uc6d4",
+                "month": "4월",
                 "beginning": 2089928,
                 "deposits": 214239,
                 "pl": 1911518,
                 "ending": 4215685
             },
             {
-                "month": "5\uc6d4",
+                "month": "5월",
                 "beginning": 4215685,
                 "deposits": 63849,
                 "pl": 4475318,
                 "ending": 8754852
+            },
+            {
+                "month": "6월",
+                "beginning": 8754852,
+                "deposits": 15982,
+                "pl": 3861518,
+                "ending": 12632352
             }
         ];
 
@@ -577,148 +593,75 @@
         }
 
         // ==========================================
-        // [2] 전역 공간 UI 상호작용 함수 선언
+        // [2] 전역 공간 UI 상호작용 함수 선언 (최적화 처리)
         // ==========================================
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(element => {
-                element.classList.add('hidden');
-                element.classList.remove('block');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-                btn.classList.add('inactive');
-            });
+            // 모든 탭 숨김 및 비활성화 클래스로 일괄 교체
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.replace('block', 'hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.replace('active', 'inactive'));
 
-            if (tabId === 'this-month') {
-                document.getElementById('sect-this-month').classList.remove('hidden');
-                document.getElementById('sect-this-month').classList.add('block');
-                document.getElementById('tab-this-month').classList.add('active');
-                document.getElementById('tab-this-month').classList.remove('inactive');
-                setTimeout(() => { if (window.chartThisMonth) window.chartThisMonth.update(); }, 50);
-            } else if (tabId === 'cumulative') {
-                document.getElementById('sect-cumulative').classList.remove('hidden');
-                document.getElementById('sect-cumulative').classList.add('block');
-                document.getElementById('tab-cumulative').classList.add('active');
-                document.getElementById('tab-cumulative').classList.remove('inactive');
-                setTimeout(() => { if (window.chartCumulative) window.chartCumulative.update(); }, 50);
-            } else if (tabId === 'monthly-change') {
-                document.getElementById('sect-monthly-change').classList.remove('hidden');
-                document.getElementById('sect-monthly-change').classList.add('block');
-                document.getElementById('tab-monthly-change').classList.add('active');
-                document.getElementById('tab-monthly-change').classList.remove('inactive');
-                setTimeout(() => { 
-                    if (window.chartMonthly) window.chartMonthly.update(); 
-                    if (window.chartComposition) window.chartComposition.update();
-                }, 50);
-            } else if (tabId === 'portfolio-holdings') {
-                document.getElementById('sect-portfolio-holdings').classList.remove('hidden');
-                document.getElementById('sect-portfolio-holdings').classList.add('block');
-                document.getElementById('tab-portfolio-holdings').classList.add('active');
-                document.getElementById('tab-portfolio-holdings').classList.remove('inactive');
-            } else if (tabId === 'investment-rules') {
-                document.getElementById('sect-investment-rules').classList.remove('hidden');
-                document.getElementById('sect-investment-rules').classList.add('block');
-                document.getElementById('tab-investment-rules').classList.add('active');
-                document.getElementById('tab-investment-rules').classList.remove('inactive');
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            const targetSect = document.getElementById(`sect-${tabId}`);
+            if (targetTab && targetSect) {
+                targetTab.classList.replace('inactive', 'active');
+                targetSect.classList.replace('hidden', 'block');
+            }
+
+            // 활성화된 탭 내부 차트만 선별하여 리렌더링
+            const charts = {
+                'this-month': window.chartThisMonth,
+                'cumulative': window.chartCumulative,
+                'monthly-change': [window.chartMonthly, window.chartComposition]
+            };
+            const target = charts[tabId];
+            if (target) {
+                setTimeout(() => { [].concat(target).forEach(c => c && c.update()); }, 50);
             }
         }
 
         // 이번달/누적 탭 간 버튼 상태 및 데이터셋 표시 여부 동기화 함수
-        function toggleDataset(chartId, datasetIndex) {
-            const chart1 = window.chartThisMonth;
-            const chart2 = window.chartCumulative;
-            if (!chart1 || !chart2) return;
-
-            // 하나의 차트 상태를 기준으로 반전시킬 상태값 결정
-            const isVisible = chart1.isDatasetVisible(datasetIndex);
-            const nextVisible = !isVisible;
-
-            // 두 차트의 가시성 상태를 동기화하여 업데이트
-            chart1.setDatasetVisibility(datasetIndex, nextVisible);
-            chart1.update();
-
-            chart2.setDatasetVisibility(datasetIndex, nextVisible);
-            chart2.update();
-
-            // 두 탭의 버튼 활성화 스타일 동기화
-            const btnThisMonth = document.getElementById(`btn-this-month-${datasetIndex}`);
-            const btnCumulative = document.getElementById(`btn-cumulative-${datasetIndex}`);
-
-            if (nextVisible) {
-                if (btnThisMonth) btnThisMonth.classList.remove('opacity-30');
-                if (btnCumulative) btnCumulative.classList.remove('opacity-30');
-            } else {
-                if (btnThisMonth) btnThisMonth.classList.add('opacity-30');
-                if (btnCumulative) btnCumulative.classList.add('opacity-30');
-            }
+        function toggleDataset(chartId, idx) {
+            const c1 = window.chartThisMonth, c2 = window.chartCumulative;
+            if (!c1 || !c2) return;
+            const nextVisible = !c1.isDatasetVisible(idx);
+            
+            [c1, c2].forEach(c => { c.setDatasetVisibility(idx, nextVisible); c.update(); });
+            ['this-month', 'cumulative'].forEach(id => {
+                const btn = document.getElementById(`btn-${id}-${idx}`);
+                if (btn) btn.classList.toggle('opacity-30', !nextVisible);
+            });
         }
 
         // ==========================================
         // [3] 안전한 DOM 가속 제어
         // ==========================================
         document.addEventListener('DOMContentLoaded', () => {
-            // (A) 일간 누적 수익률(%) 자동 계산
-            const dailyData = rawDailyPrices.map((row) => {
-                const date = row[0];
-                const portfolio_idx = row[1];
-                const nasdaq_idx = row[2];
-                const sp500_idx = row[3];
-                const phlx_idx = row[4];
-                
-                const portfolio_cum = portfolio_idx - 100.0;
-                const nasdaq_cum = nasdaq_idx - 100.0;
-                const sp500_cum = sp500_idx - 100.0;
-                const phlx_cum = phlx_idx - 100.0;
-                
-                return {
-                    date,
-                    portfolio_idx,
-                    nasdaq_idx,
-                    sp500_idx,
-                    phlx_idx,
-                    portfolio_cum: Number(portfolio_cum.toFixed(2)),
-                    nasdaq_cum: Number(nasdaq_cum.toFixed(2)),
-                    sp500_cum: Number(sp500_cum.toFixed(2)),
-                    phlx_cum: Number(phlx_cum.toFixed(2))
-                };
-            });
+            // (A) 일간 누적 수익률(%) 자동 계산 (구조 압축)
+            const dailyData = rawDailyPrices.map(([date, p, n, s, ph]) => ({
+                date, portfolio_idx: p, nasdaq_idx: n, sp500_idx: s, phlx_idx: ph,
+                portfolio_cum: Number((p - 100).toFixed(2)),
+                nasdaq_cum: Number((n - 100).toFixed(2)),
+                sp500_cum: Number((s - 100).toFixed(2)),
+                phlx_cum: Number((ph - 100).toFixed(2))
+            }));
 
-            // (B) 이번달 수익률(%) 자동 계산 (전역 변수 기반)
-            const baseRow = rawDailyPrices.find(row => row[0] === thisMonthBaseDate) || rawDailyPrices[0];
-            const p_base = baseRow[1];
-            const n_base = baseRow[2];
-            const s_base = baseRow[3];
-            const ph_base = baseRow[4];
+            // (B) 이번달 수익률(%) 자동 계산 (구조 압축)
+            const [, p_base, n_base, s_base, ph_base] = rawDailyPrices.find(r => r[0] === thisMonthBaseDate) || rawDailyPrices[0];
 
             const mayData = rawDailyPrices
-                .filter(row => row[0] >= thisMonthBaseDate && row[0] <= portfolioBaseDate)
-                .map(row => {
-                    const date = row[0];
-                    const p_val = row[1];
-                    const n_val = row[2];
-                    const s_val = row[3];
-                    const ph_val = row[4];
-                    
-                    const portfolio_may = (p_val / p_base - 1.0) * 100.0;
-                    const nasdaq_may = (n_val / n_base - 1.0) * 100.0;
-                    const sp500_may = (s_val / s_base - 1.0) * 100.0;
-                    const phlx_may = (ph_val / ph_base - 1.0) * 100.0;
-                    
-                    return {
-                        date,
-                        portfolio_may: Number(portfolio_may.toFixed(2)),
-                        nasdaq_may: Number(nasdaq_may.toFixed(2)),
-                        sp500_may: Number(sp500_may.toFixed(2)),
-                        phlx_may: Number(phlx_may.toFixed(2))
-                    };
-                });
+                .filter(([date]) => date >= thisMonthBaseDate && date <= portfolioBaseDate)
+                .map(([date, p, n, s, ph]) => ({
+                    date,
+                    portfolio_may: Number(((p / p_base - 1) * 100).toFixed(2)),
+                    nasdaq_may: Number(((n / n_base - 1) * 100).toFixed(2)),
+                    sp500_may: Number(((s / s_base - 1) * 100).toFixed(2)),
+                    phlx_may: Number(((ph / ph_base - 1) * 100).toFixed(2))
+                }));
 
-            // 1) 최신 가용한 데이터 가져오기
             const latestDaily = dailyData[dailyData.length - 1];
             const latestMay = mayData[mayData.length - 1];
             const earliestDaily = dailyData[0];
             
-            // 2) 기준일 및 상관계수 렌더링 적용 (중앙 변수 연동)
             const formattedPortfolioBase = portfolioBaseDate.replace(/-/g, '.');
             const formattedThisMonthBase = thisMonthBaseDate.replace(/-/g, '.');
 
@@ -726,187 +669,140 @@
             document.getElementById('lbl-header-date').textContent = '기준일 : ' + formattedPortfolioBase;
             document.getElementById('val-cum-correlation').textContent = correlationCoefficient.toFixed(3);
 
-            // 이번달 성과 요약 카드 및 서브텍스트
             const mayPortfolioRet = latestMay.portfolio_may;
             const mayNasdaqRet = latestMay.nasdaq_may;
             const mayDiff = mayPortfolioRet - mayNasdaqRet;
             
-            const thisMonthRetEl = document.getElementById('val-this-month-ret');
-            thisMonthRetEl.textContent = (mayPortfolioRet >= 0 ? '+' : '') + mayPortfolioRet.toFixed(2) + '%';
-            if (mayPortfolioRet >= 0) {
-                thisMonthRetEl.classList.add('text-[#10c07c]');
-                thisMonthRetEl.classList.remove('text-[#f24151]');
-            } else {
-                thisMonthRetEl.classList.add('text-[#f24151]');
-                thisMonthRetEl.classList.remove('text-[#10c07c]');
-            }
+            // 공통 스타일링 값 적용 헬퍼
+            const applyValAndColor = (id, val, text) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.textContent = text;
+                    el.classList.toggle('text-[#10c07c]', val >= 0);
+                    el.classList.toggle('text-[#f24151]', val < 0);
+                }
+            };
 
-            const thisMonthDiffEl = document.getElementById('val-this-month-diff');
-            thisMonthDiffEl.textContent = (mayDiff >= 0 ? '+' : '') + mayDiff.toFixed(2) + '%p';
-            if (mayDiff >= 0) {
-                thisMonthDiffEl.classList.add('text-[#10c07c]');
-                thisMonthDiffEl.classList.remove('text-[#f24151]');
-            } else {
-                thisMonthDiffEl.classList.add('text-[#f24151]');
-                thisMonthDiffEl.classList.remove('text-[#10c07c]');
-            }
+            applyValAndColor('val-this-month-ret', mayPortfolioRet, `${mayPortfolioRet >= 0 ? '+' : ''}${mayPortfolioRet.toFixed(2)}%`);
+            applyValAndColor('val-this-month-diff', mayDiff, `${mayDiff >= 0 ? '+' : ''}${mayDiff.toFixed(2)}%p`);
 
             document.getElementById('lbl-this-month-period').textContent = '기간: ' + formattedThisMonthBase + ' ~ ' + formattedPortfolioBase;
             document.getElementById('lbl-this-month-chart-sub').textContent = formattedThisMonthBase + '을 0.00% 기준으로 한 상대 수익률 추이';
 
-            // 3) 누적 수익률 요약 카드 및 서브텍스트
             const cumPortfolioRet = latestDaily.portfolio_cum;
             const cumNasdaqRet = latestDaily.nasdaq_cum;
             const cumDiff = cumPortfolioRet - cumNasdaqRet;
             
-            const cumRetEl = document.getElementById('val-cum-ret');
-            cumRetEl.textContent = (cumPortfolioRet >= 0 ? '+' : '') + cumPortfolioRet.toFixed(2) + '%';
-            if (cumPortfolioRet >= 0) {
-                cumRetEl.classList.add('text-[#10c07c]');
-                cumRetEl.classList.remove('text-[#f24151]');
-            } else {
-                cumRetEl.classList.add('text-[#f24151]');
-                cumRetEl.classList.remove('text-[#10c07c]');
-            }
-
-            const cumDiffEl = document.getElementById('val-cum-diff');
-            cumDiffEl.textContent = (cumDiff >= 0 ? '+' : '') + cumDiff.toFixed(2) + '%p';
-            if (cumDiff >= 0) {
-                cumDiffEl.classList.add('text-[#10c07c]');
-                cumDiffEl.classList.remove('text-[#f24151]');
-            } else {
-                cumDiffEl.classList.add('text-[#f24151]');
-                cumDiffEl.classList.remove('text-[#10c07c]');
-            }
+            applyValAndColor('val-cum-ret', cumPortfolioRet, `${cumPortfolioRet >= 0 ? '+' : ''}${cumPortfolioRet.toFixed(2)}%`);
+            applyValAndColor('val-cum-diff', cumDiff, `${cumDiff >= 0 ? '+' : ''}${cumDiff.toFixed(2)}%p`);
 
             document.getElementById('lbl-cum-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + formattedPortfolioBase;
             document.getElementById('lbl-cum-chart-sub').textContent = earliestDaily.date.replace(/-/g, '.') + '을 0.00% 기준으로 한 누적 수익률 추이';
             document.getElementById('lbl-cum-correlation-period').textContent = '기간: ' + earliestDaily.date.replace(/-/g, '.') + ' ~ ' + formattedPortfolioBase;
 
-            // 4) 포트폴리오 탭 기준일 통일 적용
             document.getElementById('lbl-holdings-date').textContent = formattedPortfolioBase + ' 기준';
             document.getElementById('lbl-freestyle-holdings-date').textContent = formattedPortfolioBase + ' 기준';
             document.getElementById('lbl-holdings-table-date').textContent = portfolioBaseDate + ' 기준';
             document.getElementById('lbl-freestyle-holdings-table-date').textContent = portfolioBaseDate + ' 기준';
 
-            // 5) 월별 자산변화 요약 메트릭 카드 업데이트
             const latestMonthObj = rawMonthlyData[rawMonthlyData.length - 1];
             const totalPL = rawMonthlyData.reduce((acc, cur) => acc + cur.pl, 0);
             
             document.getElementById('lbl-assets-final-month').textContent = '총 자산 (' + latestMonthObj.month + '말 기준)';
             document.getElementById('val-total-assets').textContent = formatKRW(latestMonthObj.ending);
-            
-            const cumPLEl = document.getElementById('val-cum-pl');
-            cumPLEl.textContent = (totalPL >= 0 ? '+' : '') + formatKRW(totalPL);
-            if (totalPL >= 0) {
-                cumPLEl.classList.add('text-[#10c07c]');
-                cumPLEl.classList.remove('text-[#f24151]');
-            } else {
-                cumPLEl.classList.add('text-[#f24151]');
-                cumPLEl.classList.remove('text-[#10c07c]');
-            }
+            applyValAndColor('val-cum-pl', totalPL, `${totalPL >= 0 ? '+' : ''}${formatKRW(totalPL)}`);
 
-            // 6) 포트폴리오 요약 메트릭 카드 업데이트 (간소화 데이터 길이 기준)
             document.getElementById('val-holdings-count').textContent = rawFundHoldings.length + '개';
             document.getElementById('val-freestyle-count').textContent = rawFreestyleHoldings.length + '개';
 
-            // 7) 월별 자산변화 리스트 데이터 테이블 채우기
-            const tableBody = document.getElementById('monthly-table-body');
-            tableBody.innerHTML = '';
-            rawMonthlyData.forEach(m => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-800/20 transition-colors";
-                const plClass = m.pl >= 0 ? "text-[#10c07c] font-medium" : "text-[#f24151] font-medium";
-                const plPrefix = m.pl > 0 ? "+" : "";
-                
-                tr.innerHTML = `
+            // 월별 자산변화 리스트 데이터 테이블 채우기 (HTML 압축)
+            document.getElementById('monthly-table-body').innerHTML = rawMonthlyData.map(m => `
+                <tr class="hover:bg-gray-800/20 transition-colors">
                     <td class="py-3 font-semibold text-[#D9DDE6]">${m.month}</td>
                     <td class="py-3 text-right text-gray-400">${formatKRW(m.beginning)}</td>
                     <td class="py-3 text-right text-gray-300">${formatKRW(m.deposits)}</td>
-                    <td class="py-3 text-right ${plClass}">${plPrefix}${formatKRW(m.pl)}</td>
+                    <td class="py-3 text-right ${m.pl >= 0 ? 'text-[#10c07c]' : 'text-[#f24151]'} font-medium">
+                        ${m.pl > 0 ? '+' : ''}${formatKRW(m.pl)}
+                    </td>
                     <td class="py-3 text-right font-medium text-[#D9DDE6]">${formatKRW(m.ending)}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
+                </tr>
+            `).join('');
 
-            // 8) Fund-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (출력 시 현재 비중 기준 내림차순 정렬)
-            const holdingsTableBody = document.getElementById('holdings-table-body');
-            holdingsTableBody.innerHTML = '';
-            
-            // rawFundHoldings 배열을 현재 비중(weight, index 1) 기준으로 내림차순 정렬하여 새 복사 배열 생성
-            const sortedFundHoldings = [...rawFundHoldings].sort((a, b) => b[1] - a[1]);
-            
-            sortedFundHoldings.forEach(([name, weight, change]) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
-                const isPositive = change >= 0;
-                const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
-                const formattedWeight = weight.toFixed(2) + '%';
-                const formattedChange = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-                
-                tr.innerHTML = `
-                    <td class="py-3.5 text-gray-100 font-semibold">${name}</td>
-                    <td class="py-3.5 text-right text-[#D9DDE6] font-bold">${formattedWeight}</td>
-                    <td class="py-3.5 text-right ${changeClass} font-bold">${formattedChange}</td>
-                `;
-                holdingsTableBody.appendChild(tr);
-            });
+            // 포트폴리오 비중 구성 데이터 테이블 채우기 공통 유틸 함수
+            const renderHoldings = (targetId, rawData) => {
+                document.getElementById(targetId).innerHTML = [...rawData]
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name, weight, change]) => `
+                        <tr class="border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors">
+                            <td class="py-3.5 text-gray-100 font-semibold">${name}</td>
+                            <td class="py-3.5 text-right text-[#D9DDE6] font-bold">${weight.toFixed(2)}%</td>
+                            <td class="py-3.5 text-right ${change >= 0 ? 'text-[#10c07c]' : 'text-[#f24151]'} font-bold">
+                                ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
+                            </td>
+                        </tr>
+                    `).join('');
+            };
 
-            // 9) Free-Style 포트폴리오 비중 구성 데이터 테이블 채우기 (출력 시 현재 비중 기준 내림차순 정렬)
-            const freestyleHoldingsTableBody = document.getElementById('freestyle-holdings-table-body');
-            freestyleHoldingsTableBody.innerHTML = '';
-            
-            // rawFreestyleHoldings 배열을 현재 비중(weight, index 1) 기준으로 내림차순 정렬하여 새 복사 배열 생성
-            const sortedFreestyleHoldings = [...rawFreestyleHoldings].sort((a, b) => b[1] - a[1]);
-            
-            sortedFreestyleHoldings.forEach(([name, weight, change]) => {
-                const tr = document.createElement('tr');
-                tr.className = "border-b border-gray-800/20 hover:bg-gray-800/10 transition-colors";
-                const isPositive = change >= 0;
-                const changeClass = isPositive ? "text-[#10c07c]" : "text-[#f24151]";
-                const formattedWeight = weight.toFixed(2) + '%';
-                const formattedChange = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
-                
-                tr.innerHTML = `
-                    <td class="py-3.5 text-gray-100 font-semibold">${name}</td>
-                    <td class="py-3.5 text-right text-[#D9DDE6] font-bold">${formattedWeight}</td>
-                    <td class="py-3.5 text-right ${changeClass} font-bold">${formattedChange}</td>
-                `;
-                freestyleHoldingsTableBody.appendChild(tr);
-            });
+            renderHoldings('holdings-table-body', rawFundHoldings);
+            renderHoldings('freestyle-holdings-table-body', rawFreestyleHoldings);
 
             // ==========================================
-            // [4] Chart.js 그래프 구성 및 마운트
+            // [4] Chart.js 그래프 구성 및 마운트 (구조 최적화)
             // ==========================================
-            // 화면 비율이 세로형이거나 좁을 경우 차트 내 폰트 스케일도 동적 축소(11 -> 9.5)
-            const isPortraitLayout = (window.innerHeight > window.innerWidth) || (window.innerWidth < 640);
-            const dynamicFontSize = isPortraitLayout ? 9.5 : 11;
-            const fontSettings = { family: "'Pretendard', sans-serif", size: dynamicFontSize };
             const gridSettings = { color: 'rgba(217, 221, 230, 0.06)', drawBorder: false };
+
+            // RGB, RGBA, Hex 색상값을 반투명한 색상으로 안전하게 변환하는 공통 헬퍼 함수
+            function convertToAlpha(c, o) {
+                if (!c) return c;
+                const t = c.trim();
+                if (t.startsWith('#')) return `rgba(${parseInt(t.slice(1,3),16)},${parseInt(t.slice(3,5),16)},${parseInt(t.slice(5,7),16)},${o})`;
+                if (t.startsWith('rgba')) return t.replace(/[\d\.]+\)$/, `${o})`);
+                if (t.startsWith('rgb')) return t.replace('rgb', 'rgba').replace(')', `, ${o})`);
+                return t;
+            }
+
+            // 화면 해상도 변화에 따른 dynamic 폰트 계산
+            const dynamicFontSettings = (ctx) => {
+                const chart = ctx.chart || (ctx.scale ? ctx.scale.chart : null);
+                const w = chart ? chart.width : 500;
+                return {
+                    family: "'Pretendard', sans-serif",
+                    size: Math.max(9.5, Math.min(11, 9.5 + (w - 320) * (1.5 / 580)))
+                };
+            };
+
+            // 범례 취소선 방지 및 페이드 라벨 제어 렌더러
+            const customGenerateLabels = (chart) => {
+                const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                labels.forEach(item => {
+                    const visible = chart.isDatasetVisible(item.datasetIndex);
+                    item.hidden = false;
+                    item.fontColor = visible ? '#94a3b8' : 'rgba(148, 163, 184, 0.25)';
+                    if (!visible) {
+                        item.fillStyle = convertToAlpha(item.fillStyle, 0.25);
+                        item.strokeStyle = convertToAlpha(item.strokeStyle, 0.25);
+                    }
+                });
+                return labels;
+            };
 
             const lineEndLabelsPlugin = {
                 id: 'lineEndLabels',
                 afterDatasetsDraw(chart) {
                     const { ctx } = chart;
                     ctx.save();
-                    chart.data.datasets.forEach((dataset, i) => {
+                    const fSize = Math.max(9.5, Math.min(11, 9.5 + (chart.width - 320) * (1.5 / 580)));
+                    chart.data.datasets.forEach((ds, i) => {
                         if (!chart.isDatasetVisible(i)) return;
-
                         const meta = chart.getDatasetMeta(i);
-                        const lastIndex = dataset.data.length - 1;
-                        const lastPoint = meta.data[lastIndex];
-                        if (lastPoint) {
-                            const x = lastPoint.x;
-                            const y = lastPoint.y;
-                            const val = dataset.data[lastIndex];
-                            const sign = val >= 0 ? '+' : '';
-                            const text = sign + val.toFixed(1) + '%';
-
-                            ctx.fillStyle = dataset.borderColor;
-                            ctx.font = `bold ${dynamicFontSize}px Pretendard, sans-serif`;
+                        const pt = meta.data[ds.data.length - 1];
+                        if (pt) {
+                            const val = ds.data[ds.data.length - 1];
+                            ctx.fillStyle = ds.borderColor;
+                            ctx.font = `bold ${fSize}px Pretendard, sans-serif`;
                             ctx.textBaseline = 'middle';
                             ctx.textAlign = 'left';
-                            ctx.fillText(text, x + 6, y);
+                            ctx.fillText((val >= 0 ? '+' : '') + val.toFixed(1) + '%', pt.x + 6, pt.y);
                         }
                     });
                     ctx.restore();
@@ -980,15 +876,14 @@
                             borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
-                            bodyFont: fontSettings,
-                            titleFont: fontSettings,
+                            bodyFont: dynamicFontSettings,
+                            titleFont: dynamicFontSettings,
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label.split(' (')[0] || '';
                                     if (label) label += ': ';
                                     if (context.parsed.y !== null) {
-                                        const sign = context.parsed.y >= 0 ? '+' : '';
-                                        label += sign + context.parsed.y.toFixed(2) + '%';
+                                        label += (context.parsed.y >= 0 ? '+' : '') + context.parsed.y.toFixed(2) + '%';
                                     }
                                     return label;
                                 }
@@ -998,13 +893,13 @@
                     scales: {
                         x: {
                             grid: gridSettings,
-                            ticks: { color: '#64748b', font: fontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
+                            ticks: { color: '#64748b', font: dynamicFontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
                         },
                         y: {
                             grid: gridSettings,
                             ticks: {
                                 color: '#64748b',
-                                font: fontSettings,
+                                font: dynamicFontSettings,
                                 callback: function(value) { return (value >= 0 ? '+' : '') + value + '%'; }
                             }
                         }
@@ -1025,7 +920,7 @@
                             label: 'Portfolio (포트폴리오)',
                             data: dailyData.map(d => d.portfolio_cum),
                             borderColor: '#cbd5e1',
-                            borderWidth: 2.5,
+                            borderWidth: 2.25,
                             pointRadius: 0,
                             pointHoverRadius: 4,
                             tension: 0.25,
@@ -1079,15 +974,14 @@
                             borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
-                            bodyFont: fontSettings,
-                            titleFont: fontSettings,
+                            bodyFont: dynamicFontSettings,
+                            titleFont: dynamicFontSettings,
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label.split(' (')[0] || '';
                                     if (label) label += ': ';
                                     if (context.parsed.y !== null) {
-                                        const sign = context.parsed.y >= 0 ? '+' : '';
-                                        label += sign + context.parsed.y.toFixed(2) + '%';
+                                        label += (context.parsed.y >= 0 ? '+' : '') + context.parsed.y.toFixed(2) + '%';
                                     }
                                     return label;
                                 }
@@ -1097,13 +991,13 @@
                     scales: {
                         x: {
                             grid: gridSettings,
-                            ticks: { color: '#64748b', font: fontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }
+                            ticks: { color: '#64748b', font: dynamicFontSettings, maxRotation: 45, autoSkip: true, maxTicksLimit: 15 }
                         },
                         y: {
                             grid: gridSettings,
                             ticks: {
                                 color: '#64748b',
-                                font: fontSettings,
+                                font: dynamicFontSettings,
                                 callback: function(value) { return (value >= 0 ? '+' : '') + value + '%'; }
                             }
                         }
@@ -1157,13 +1051,13 @@
                         {
                             label: '투자 손익 (Investment P/L)',
                             data: rawMonthlyData.map(m => m.pl),
-                            backgroundColor: function(context) {
-                                const value = context.dataset.data[context.dataIndex];
-                                return value >= 0 ? 'rgba(16, 192, 124, 0.75)' : 'rgba(242, 65, 81, 0.75)';
+                            backgroundColor: (context) => {
+                                const val = context.dataset.data[context.dataIndex];
+                                return val >= 0 ? 'rgba(16, 192, 124, 0.75)' : 'rgba(242, 65, 81, 0.75)';
                             },
-                            borderColor: function(context) {
-                                const value = context.dataset.data[context.dataIndex];
-                                return value >= 0 ? '#10c07c' : '#f24151';
+                            borderColor: (context) => {
+                                const val = context.dataset.data[context.dataIndex];
+                                return val >= 0 ? '#10c07c' : '#f24151';
                             },
                             borderWidth: 1,
                             stack: 'assets_pillar',
@@ -1177,7 +1071,14 @@
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { color: '#94a3b8', font: fontSettings, boxWidth: 10, boxHeight: 10, padding: 12 }
+                            labels: { 
+                                color: '#94a3b8', 
+                                font: dynamicFontSettings, 
+                                boxWidth: 10, 
+                                boxHeight: 10, 
+                                padding: 12,
+                                generateLabels: customGenerateLabels
+                            }
                         },
                         tooltip: {
                             backgroundColor: '#0c0d14',
@@ -1186,8 +1087,8 @@
                             borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
-                            bodyFont: fontSettings,
-                            titleFont: fontSettings,
+                            bodyFont: dynamicFontSettings,
+                            titleFont: dynamicFontSettings,
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label.split(' (')[0] || '';
@@ -1199,13 +1100,13 @@
                         }
                     },
                     scales: {
-                        x: { stacked: true, grid: gridSettings, ticks: { color: '#64748b', font: fontSettings } },
+                        x: { stacked: true, grid: gridSettings, ticks: { color: '#64748b', font: dynamicFontSettings } },
                         y: {
                             stacked: true, 
                             grid: gridSettings,
                             ticks: {
                                 color: '#64748b',
-                                font: fontSettings,
+                                font: dynamicFontSettings,
                                 callback: function(value) {
                                     if (Math.abs(value) >= 1000000) return (value / 1000000).toFixed(1) + '백만';
                                     return value.toLocaleString('ko-KR');
@@ -1216,33 +1117,45 @@
                 }
             });
 
-            // (4) 전체 계좌 구성 도넛 차트 초기화
+            // (4) 전체 계좌 구성 가로 누적 막대 그래프 초기화
             const ctxComposition = document.getElementById('chart-composition').getContext('2d');
             window.chartComposition = new Chart(ctxComposition, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
-                    labels: ['Fund-Style Portfolio', 'Free-Style Portfolio'],
-                    datasets: [{
-                        data: [18.89, 81.10],
-                        backgroundColor: ['#3b82f6', '#10c07c'],
-                        borderColor: '#0c0d14',
-                        borderWidth: 3,
-                        hoverOffset: 4
-                    }]
+                    labels: ['계좌 구성 비율'],
+                    datasets: [
+                        {
+                            label: 'Fund-Style Portfolio',
+                            data: [18.89],
+                            backgroundColor: '#3b82f6',
+                            borderColor: '#0c0d14',
+                            borderWidth: 1.5,
+                            barThickness: 24
+                        },
+                        {
+                            label: 'Free-Style Portfolio',
+                            data: [81.11],
+                            backgroundColor: '#10c07c',
+                            borderColor: '#0c0d14',
+                            borderWidth: 1.5,
+                            barThickness: 24
+                        }
+                    ]
                 },
                 options: {
+                    indexAxis: 'y',
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: 'top',
                             labels: {
                                 color: '#94a3b8',
-                                font: fontSettings,
+                                font: dynamicFontSettings,
                                 boxWidth: 12,
                                 boxHeight: 12,
-                                padding: 20
+                                padding: 15,
+                                generateLabels: customGenerateLabels
                             }
                         },
                         tooltip: {
@@ -1252,17 +1165,36 @@
                             borderColor: 'rgba(217, 221, 230, 0.1)',
                             borderWidth: 1,
                             padding: 10,
-                            bodyFont: fontSettings,
-                            titleFont: fontSettings,
+                            bodyFont: dynamicFontSettings,
+                            titleFont: dynamicFontSettings,
                             callbacks: {
                                 label: function(context) {
-                                    let label = context.label || '';
+                                    let label = context.dataset.label || '';
                                     if (label) label += ': ';
-                                    if (context.parsed !== null) {
-                                        label += context.parsed.toFixed(1) + '%';
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x.toFixed(2) + '%';
                                     }
                                     return label;
                                 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            max: 100,
+                            grid: gridSettings,
+                            ticks: {
+                                color: '#64748b',
+                                font: dynamicFontSettings,
+                                callback: function(value) { return value + '%'; }
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            grid: { display: false },
+                            ticks: {
+                                display: false
                             }
                         }
                     }
